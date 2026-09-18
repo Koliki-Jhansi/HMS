@@ -1,0 +1,12 @@
+export { User, IUser } from './User.model';
+export { Patient, IPatient } from './Patient.model';
+export { Doctor, IDoctor } from './Doctor.model';
+export { DoctorSchedule, IDoctorSchedule } from './DoctorSchedule.model';
+export { Department, IDepartment } from './Department.model';
+export { Ward, IWard } from './Ward.model';
+export { Bed, IBed } from './Bed.model';
+export { Admission, IAdmission } from './Admission.model';
+export { Appointment, IAppointment } from './Appointment.model';
+export { Prescription, IPrescription } from './Prescription.model';
+export { MedicalRecord, IMedicalRecord } from './MedicalRecord.model';
+export { Notification, INotification } from './Notification.model';

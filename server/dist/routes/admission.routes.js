@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const admission_controller_1 = require("../controllers/admission.controller");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+router.get('/', auth_middleware_1.authenticate, admission_controller_1.getAdmissions);
+router.get('/:id', auth_middleware_1.authenticate, admission_controller_1.getAdmissionById);
+router.post('/', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['ADMIN', 'DOCTOR']), admission_controller_1.createAdmission);
+router.post('/:id/discharge', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['ADMIN', 'DOCTOR']), admission_controller_1.dischargePatient);
+router.post('/:id/transfer', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['ADMIN', 'DOCTOR']), admission_controller_1.transferBed);
+exports.default = router;
