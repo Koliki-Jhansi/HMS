@@ -26,23 +26,75 @@ const db_1 = __importDefault(require("./config/db"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
-// Middleware
-app.use((0, cors_1.default)({
-    origin: '*',
+/* =========================================================
+   CORS CONFIGURATION (Production & Localhost Support)
+   ========================================================= */
+const defaultAllowedOrigins = [
+    // Production frontend on Vercel
+    'https://hms-omega-puce.vercel.app',
+    // Local development frontends
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+];
+// Combine with optional comma-separated CLIENT_URL from .env
+const envOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',').map((url) => url.trim())
+    : [];
+const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envOrigins].map((u) => u.replace(/\/+$/, ''))));
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman, server-to-server, Render health checks)
+        if (!origin) {
+            return callback(null, true);
+        }
+        const cleanOrigin = origin.replace(/\/+$/, '');
+        // Allow exact matches or any vercel.app preview deployment
+        if (allowedOrigins.includes(cleanOrigin) ||
+            cleanOrigin.endsWith('.vercel.app') ||
+            cleanOrigin.includes('localhost') ||
+            cleanOrigin.includes('127.0.0.1')) {
+            return callback(null, true);
+        }
+        console.warn(`⚠️ CORS blocked request from origin: ${origin}`);
+        return callback(new Error(`CORS policy does not allow origin: ${origin}`));
+    },
     credentials: true,
-}));
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+        'Origin',
+        'X-Requested-With',
+        'Content-Type',
+        'Accept',
+        'Authorization',
+    ],
+    exposedHeaders: ['Authorization'],
+    maxAge: 86400, // 24 hours preflight cache
+};
+app.use((0, cors_1.default)(corsOptions));
+app.options('*', (0, cors_1.default)(corsOptions)); // Enable pre-flight for all routes
+/* =========================================================
+   GENERAL MIDDLEWARE
+   ========================================================= */
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, morgan_1.default)('dev'));
-// Health check
+/* =========================================================
+   HEALTH CHECK
+   ========================================================= */
 app.get('/api/health', (req, res) => {
-    res.json({
+    res.status(200).json({
+        success: true,
         status: 'ok',
         system: 'Hospital Management System API',
+        environment: process.env.NODE_ENV || 'development',
         timestamp: new Date().toISOString(),
     });
 });
-// API Routes
+/* =========================================================
+   API ROUTES
+   ========================================================= */
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/stats', stats_routes_1.default);
 app.use('/api/doctors', doctor_routes_1.default);
@@ -56,27 +108,45 @@ app.use('/api/prescriptions', prescription_routes_1.default);
 app.use('/api/medical-records', medicalRecord_routes_1.default);
 app.use('/api/notifications', notification_routes_1.default);
 app.use('/api/users', user_routes_1.default);
-// 404 handler for undefined routes
+/* =========================================================
+   404 HANDLER
+   ========================================================= */
 app.use('*', (req, res) => {
     res.status(404).json({
         success: false,
         message: `API endpoint not found: ${req.method} ${req.originalUrl}`,
     });
 });
-// Central error handler
+/* =========================================================
+   CENTRAL ERROR HANDLER
+   ========================================================= */
 app.use(error_middleware_1.errorHandler);
-// Start server after connecting to database
+/* =========================================================
+   START SERVER
+   ========================================================= */
 const startServer = async () => {
     try {
+        // Connect MongoDB Atlas
         await (0, db_1.default)();
         const server = app.listen(PORT, () => {
-            console.log(`🏥 Hospital Management Server running on port ${PORT}`);
-            console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+            console.log('========================================');
+            console.log('🏥 Hospital Management System API');
+            console.log('========================================');
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🌎 Environment: ${process.env.NODE_ENV || 'development'}`);
+            if (process.env.NODE_ENV === 'production') {
+                console.log('🔗 API: https://hms-khdj.onrender.com/api');
+            }
+            else {
+                console.log(`🔗 API: http://localhost:${PORT}/api`);
+            }
+            console.log('========================================');
         });
         return server;
     }
     catch (error) {
-        console.error('Failed to start server:', error);
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
     }
 };
 exports.startServer = startServer;
