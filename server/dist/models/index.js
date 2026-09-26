@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Notification = exports.MedicalRecord = exports.Prescription = exports.Appointment = exports.Admission = exports.Bed = exports.Ward = exports.Department = exports.DoctorSchedule = exports.Doctor = exports.Patient = exports.User = void 0;
+exports.Counter = exports.Notification = exports.MedicalRecord = exports.Prescription = exports.Appointment = exports.Admission = exports.Bed = exports.Ward = exports.Department = exports.DoctorSchedule = exports.Doctor = exports.Patient = exports.User = void 0;
 var User_model_1 = require("./User.model");
 Object.defineProperty(exports, "User", { enumerable: true, get: function () { return User_model_1.User; } });
 var Patient_model_1 = require("./Patient.model");
@@ -25,3 +25,5 @@ var MedicalRecord_model_1 = require("./MedicalRecord.model");
 Object.defineProperty(exports, "MedicalRecord", { enumerable: true, get: function () { return MedicalRecord_model_1.MedicalRecord; } });
 var Notification_model_1 = require("./Notification.model");
 Object.defineProperty(exports, "Notification", { enumerable: true, get: function () { return Notification_model_1.Notification; } });
+var Counter_model_1 = require("./Counter.model");
+Object.defineProperty(exports, "Counter", { enumerable: true, get: function () { return Counter_model_1.Counter; } });

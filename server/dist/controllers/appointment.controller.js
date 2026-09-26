@@ -7,6 +7,40 @@ exports.rescheduleAppointment = exports.updateAppointmentStatus = exports.create
 const mongoose_1 = __importDefault(require("mongoose"));
 const models_1 = require("../models");
 const error_middleware_1 = require("../middleware/error.middleware");
+const syncCounterWithExistingAppointments = async (counterName, currentYear) => {
+    const existingCounter = await models_1.Counter.findOne({ name: counterName });
+    if (!existingCounter) {
+        const appointments = await models_1.Appointment.find({
+            appointmentNumber: { $regex: `^APT-${currentYear}-` },
+        }).select('appointmentNumber').lean();
+        let maxSeq = 0;
+        for (const apt of appointments) {
+            const match = apt.appointmentNumber.match(/^APT-\d{4}-(\d+)/);
+            if (match && match[1]) {
+                const num = parseInt(match[1], 10);
+                if (!isNaN(num) && num > maxSeq) {
+                    maxSeq = num;
+                }
+            }
+        }
+        await models_1.Counter.findOneAndUpdate({ name: counterName }, { $setOnInsert: { seq: maxSeq } }, { upsert: true });
+    }
+};
+const generateUniqueAppointmentNumber = async () => {
+    const currentYear = new Date().getFullYear();
+    const counterName = `appointmentNumber_${currentYear}`;
+    await syncCounterWithExistingAppointments(counterName, currentYear);
+    const counter = await models_1.Counter.findOneAndUpdate({ name: counterName }, { $inc: { seq: 1 } }, { new: true, upsert: true, setDefaultsOnInsert: true });
+    let seqNum = counter.seq;
+    let appointmentNumber = `APT-${currentYear}-${String(seqNum).padStart(6, '0')}`;
+    // Safeguard: verify no collision with existing records
+    while (await models_1.Appointment.exists({ appointmentNumber })) {
+        const updated = await models_1.Counter.findOneAndUpdate({ name: counterName }, { $inc: { seq: 1 } }, { new: true, upsert: true });
+        seqNum = updated.seq;
+        appointmentNumber = `APT-${currentYear}-${String(seqNum).padStart(6, '0')}`;
+    }
+    return appointmentNumber;
+};
 exports.getAppointments = (0, error_middleware_1.catchAsync)(async (req, res) => {
     const { status, doctorId, patientId, departmentId, date, search } = req.query;
     const query = {};
@@ -166,21 +200,42 @@ exports.createAppointment = (0, error_middleware_1.catchAsync)(async (req, res) 
     if (existingSlot) {
         throw new error_middleware_1.AppError('This time slot is already booked for this doctor. Please choose another time slot.', 400);
     }
-    const appointmentCount = await models_1.Appointment.countDocuments();
-    const appointmentNumber = `APT-2026-${(600 + appointmentCount).toString()}`;
-    const apt = await models_1.Appointment.create({
-        appointmentNumber,
-        patientId: new mongoose_1.default.Types.ObjectId(patientId),
-        doctorId: new mongoose_1.default.Types.ObjectId(doctorId),
-        departmentId: departmentId && mongoose_1.default.Types.ObjectId.isValid(departmentId)
-            ? new mongoose_1.default.Types.ObjectId(departmentId)
-            : doctor.departmentId,
-        appointmentDate,
-        timeSlot,
-        status: 'PENDING',
-        reason,
-        symptoms,
-    });
+    let apt = null;
+    let attempts = 0;
+    const maxAttempts = 5;
+    while (attempts < maxAttempts) {
+        try {
+            const appointmentNumber = await generateUniqueAppointmentNumber();
+            apt = await models_1.Appointment.create({
+                appointmentNumber,
+                patientId: new mongoose_1.default.Types.ObjectId(patientId),
+                doctorId: new mongoose_1.default.Types.ObjectId(doctorId),
+                departmentId: departmentId && mongoose_1.default.Types.ObjectId.isValid(departmentId)
+                    ? new mongoose_1.default.Types.ObjectId(departmentId)
+                    : doctor.departmentId,
+                appointmentDate,
+                timeSlot,
+                status: 'PENDING',
+                reason,
+                symptoms,
+            });
+            break;
+        }
+        catch (err) {
+            if (err.code === 11000 && (err.keyPattern?.appointmentNumber || String(err.message).includes('appointmentNumber'))) {
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    throw new error_middleware_1.AppError('Unable to generate unique appointment number. Please try again.', 500);
+                }
+            }
+            else {
+                throw err;
+            }
+        }
+    }
+    if (!apt) {
+        throw new error_middleware_1.AppError('Failed to create appointment record', 500);
+    }
     // Notify doctor
     const docUser = doctor.userId;
     if (docUser) {
