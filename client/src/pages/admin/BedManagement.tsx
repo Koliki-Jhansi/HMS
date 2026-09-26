@@ -19,6 +19,7 @@ import { Ward, Bed, BedStatus } from '../../types';
 import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
+import { HospitalHeader3D } from '../../components/3d/HospitalHeader3D';
 
 export const BedManagement: React.FC = () => {
   const [wards, setWards] = useState<Ward[]>([]);
@@ -116,275 +117,152 @@ export const BedManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteBed = async (bedId: string) => {
-    if (!window.confirm('Are you sure you want to delete this bed?')) return;
-    try {
-      await api.delete(`/beds/${bedId}`);
-      fetchBedsAndWards();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete bed');
-    }
-  };
-
-  const filteredBeds = beds.filter((b) => {
-    const matchWard = selectedWard === 'ALL' || b.wardId === selectedWard;
-    const matchStatus = selectedStatus === 'ALL' || b.status === selectedStatus;
-    const matchSearch =
-      b.bedNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.ward?.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchWard && matchStatus && matchSearch;
+  const filteredBeds = beds.filter((bed) => {
+    const matchesWard = selectedWard === 'ALL' || bed.wardId === selectedWard;
+    const matchesStatus = selectedStatus === 'ALL' || bed.status === selectedStatus;
+    const matchesSearch =
+      bed.bedNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      bed.ward?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesWard && matchesStatus && matchesSearch;
   });
 
-  const totalBeds = beds.length;
-  const availableBeds = beds.filter((b) => b.status === 'AVAILABLE').length;
-  const occupiedBeds = beds.filter((b) => b.status === 'OCCUPIED').length;
-  const cleaningBeds = beds.filter((b) => b.status === 'CLEANING').length;
-  const maintenanceBeds = beds.filter((b) => b.status === 'MAINTENANCE').length;
-  const reservedBeds = beds.filter((b) => b.status === 'RESERVED').length;
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Bed & Ward Visualizer Matrix
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Real-time hospital bed grid, live status toggles, ward allocation, and occupancy metrics.
-          </p>
-        </div>
+    <div className="space-y-6 text-white select-none">
+      {/* 3D Hospital Header */}
+      <HospitalHeader3D
+        type="room"
+        badge="Hospital Facilities Matrix"
+        title="Bed & Ward Capacity Matrix"
+        subtitle="Live telemetry for ICU, Critical Care, Emergency, Semi-Private, and General Ward beds."
+        actions={
+          <button
+            onClick={() => {
+              setShowAddModal(true);
+              setError(null);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            Register New Bed
+          </button>
+        }
+      />
 
-        <button
-          onClick={() => {
-            setShowAddModal(true);
-            setError(null);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-purple-500/20 transition-all self-start"
-        >
-          <Plus className="w-4 h-4" />
-          Add New Bed Unit
-        </button>
-      </div>
-
-      {/* Bed Status Summary Meters */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <button
-          onClick={() => setSelectedStatus('ALL')}
-          className={`p-4 rounded-2xl border text-center transition-all ${
-            selectedStatus === 'ALL'
-              ? 'bg-purple-600 text-white border-purple-600 shadow-md'
-              : 'bg-white border-slate-200 text-slate-900'
-          }`}
-        >
-          <span className="text-[10px] font-bold uppercase opacity-80">Total Beds</span>
-          <p className="text-xl font-extrabold mt-0.5">{totalBeds}</p>
-        </button>
-
-        <button
-          onClick={() => setSelectedStatus('AVAILABLE')}
-          className={`p-4 rounded-2xl border text-center transition-all ${
-            selectedStatus === 'AVAILABLE'
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-md'
-              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-          }`}
-        >
-          <span className="text-[10px] font-bold uppercase">Available</span>
-          <p className="text-xl font-extrabold mt-0.5">{availableBeds}</p>
-        </button>
-
-        <button
-          onClick={() => setSelectedStatus('OCCUPIED')}
-          className={`p-4 rounded-2xl border text-center transition-all ${
-            selectedStatus === 'OCCUPIED'
-              ? 'bg-rose-600 text-white border-rose-600 shadow-md'
-              : 'bg-rose-50 border-rose-200 text-rose-800'
-          }`}
-        >
-          <span className="text-[10px] font-bold uppercase">Occupied</span>
-          <p className="text-xl font-extrabold mt-0.5">{occupiedBeds}</p>
-        </button>
-
-        <button
-          onClick={() => setSelectedStatus('RESERVED')}
-          className={`p-4 rounded-2xl border text-center transition-all ${
-            selectedStatus === 'RESERVED'
-              ? 'bg-amber-600 text-white border-amber-600 shadow-md'
-              : 'bg-amber-50 border-amber-200 text-amber-800'
-          }`}
-        >
-          <span className="text-[10px] font-bold uppercase">Reserved</span>
-          <p className="text-xl font-extrabold mt-0.5">{reservedBeds}</p>
-        </button>
-
-        <button
-          onClick={() => setSelectedStatus('CLEANING')}
-          className={`p-4 rounded-2xl border text-center transition-all ${
-            selectedStatus === 'CLEANING'
-              ? 'bg-cyan-600 text-white border-cyan-600 shadow-md'
-              : 'bg-cyan-50 border-cyan-200 text-cyan-800'
-          }`}
-        >
-          <span className="text-[10px] font-bold uppercase">Cleaning</span>
-          <p className="text-xl font-extrabold mt-0.5">{cleaningBeds}</p>
-        </button>
-
-        <button
-          onClick={() => setSelectedStatus('MAINTENANCE')}
-          className={`p-4 rounded-2xl border text-center transition-all ${
-            selectedStatus === 'MAINTENANCE'
-              ? 'bg-slate-700 text-white border-slate-700 shadow-md'
-              : 'bg-slate-100 border-slate-300 text-slate-800'
-          }`}
-        >
-          <span className="text-[10px] font-bold uppercase">Maintenance</span>
-          <p className="text-xl font-extrabold mt-0.5">{maintenanceBeds}</p>
-        </button>
-      </div>
-
-      {/* Ward Filter Pills & Search */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      {/* Filter & Controls Bar */}
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search bed number, ward..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:bg-white"
+            placeholder="Search by bed number or ward name..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder:text-slate-500"
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
-          <button
-            onClick={() => setSelectedWard('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-              selectedWard === 'ALL'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            All Wards
-          </button>
-          {wards.map((w) => (
+        <div className="flex flex-wrap items-center gap-2 max-w-full">
+          {/* Status Filter */}
+          {['ALL', 'AVAILABLE', 'OCCUPIED', 'CLEANING', 'MAINTENANCE'].map((st) => (
             <button
-              key={w.id}
-              onClick={() => setSelectedWard(w.id)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                selectedWard === w.id
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              key={st}
+              onClick={() => setSelectedStatus(st)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                selectedStatus === st
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              {w.name}
+              {st}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Bed Cards Matrix Grid */}
+      {/* Ward Switcher Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+        <button
+          onClick={() => setSelectedWard('ALL')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+            selectedWard === 'ALL'
+              ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+              : 'bg-slate-900/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
+          }`}
+        >
+          All Units ({beds.length})
+        </button>
+        {wards.map((ward) => {
+          const wardBeds = beds.filter((b) => b.wardId === ward.id);
+          return (
+            <button
+              key={ward.id}
+              onClick={() => setSelectedWard(ward.id)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                selectedWard === ward.id
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-900/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              {ward.name} ({wardBeds.length})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Bed Matrix Grid */}
       {loading ? (
-        <LoadingSpinner text="Rendering ward bed matrix..." />
-      ) : filteredBeds.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-200">
-          <BedDouble className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-xs text-slate-500">No beds match your filter criteria.</p>
-        </div>
+        <LoadingSpinner text="Scanning live hospital beds..." />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
           {filteredBeds.map((bed) => {
-            const activeAdm = bed.admissions && bed.admissions.length > 0 ? bed.admissions[0] : null;
+            const isAvail = bed.status === 'AVAILABLE';
+            const isOcc = bed.status === 'OCCUPIED';
+            const isClean = bed.status === 'CLEANING';
+            const isMaint = bed.status === 'MAINTENANCE';
 
             return (
               <div
                 key={bed.id}
-                className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between"
+                onClick={() => {
+                  setSelectedBedForStatus(bed);
+                  setTargetStatus(bed.status);
+                }}
+                className={`p-4 rounded-2xl border backdrop-blur-xl transition-all shadow-md flex flex-col justify-between cursor-pointer hover:scale-102 ${
+                  isAvail
+                    ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-100 hover:border-emerald-400/60'
+                    : isOcc
+                    ? 'bg-rose-950/30 border-rose-500/30 text-rose-100 hover:border-rose-400/60'
+                    : isClean
+                    ? 'bg-sky-950/30 border-sky-500/30 text-sky-100 hover:border-sky-400/60'
+                    : 'bg-slate-950/30 border-slate-700/40 text-slate-300 hover:border-slate-500'
+                }`}
               >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={`p-2.5 rounded-xl ${
-                          bed.status === 'AVAILABLE'
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : bed.status === 'OCCUPIED'
-                            ? 'bg-rose-50 text-rose-600'
-                            : bed.status === 'RESERVED'
-                            ? 'bg-amber-50 text-amber-600'
-                            : bed.status === 'CLEANING'
-                            ? 'bg-cyan-50 text-cyan-600'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        <BedDouble className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-extrabold text-slate-900 font-mono">
-                          {bed.bedNumber}
-                        </h3>
-                        <span className="text-[10px] text-slate-500 font-semibold block truncate max-w-[120px]">
-                          {bed.ward.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    <Badge status={bed.status} size="sm" />
-                  </div>
-
-                  {/* If occupied, show patient info */}
-                  {activeAdm ? (
-                    <div className="mt-3 p-2.5 rounded-xl bg-purple-50/80 border border-purple-100 text-xs">
-                      <p className="font-bold text-slate-900 truncate">
-                        👤 {activeAdm.patient.user.name}
-                      </p>
-                      <p className="text-[11px] text-purple-700 font-medium truncate mt-0.5">
-                        Dr. {activeAdm.doctor?.user?.name}
-                      </p>
-                      <span className="text-[10px] text-slate-400 block mt-1">
-                        Adm: {new Date(activeAdm.admissionDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="mt-3 space-y-1 text-xs text-slate-500">
-                      <div className="flex justify-between">
-                        <span>Ward Type:</span>
-                        <span className="font-semibold text-slate-700">{bed.ward.type}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Daily Rate:</span>
-                        <span className="font-bold text-slate-900">${bed.dailyRate}/day</span>
-                      </div>
-                      {bed.notes && (
-                        <p className="text-[11px] text-slate-400 italic pt-1 truncate">
-                          {bed.notes}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-mono font-bold uppercase truncate">
+                    {bed.ward?.name}
+                  </span>
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isAvail
+                        ? 'bg-emerald-400 animate-pulse'
+                        : isOcc
+                        ? 'bg-rose-400'
+                        : isClean
+                        ? 'bg-sky-400'
+                        : 'bg-slate-400'
+                    }`}
+                  />
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => {
-                      setSelectedBedForStatus(bed);
-                      setTargetStatus(bed.status);
-                      setStatusNotes(bed.notes || '');
-                      setError(null);
-                    }}
-                    className="w-full py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors text-center"
-                  >
-                    Quick Status Change
-                  </button>
+                <div className="my-1.5">
+                  <BedDouble className="w-5 h-5 mb-1 opacity-80" />
+                  <span className="text-lg font-extrabold font-mono block">Bed {bed.bedNumber}</span>
+                  <span className="text-[10px] opacity-75">${bed.dailyRate}/day</span>
+                </div>
 
-                  {!activeAdm && (
-                    <button
-                      onClick={() => handleDeleteBed(bed.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                      title="Delete bed"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+                <div className="pt-2 mt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-bold">
+                  <span className="uppercase">{bed.status}</span>
+                  <span className="text-blue-300">Update →</span>
                 </div>
               </div>
             );
@@ -392,48 +270,35 @@ export const BedManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Add Bed Modal */}
+      {/* Register Bed Modal */}
       {showAddModal && (
         <Modal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
-          title="Add New Hospital Bed Unit"
-          subtitle="Configure unit number, ward location, and billing rate"
+          title="Register New Hospital Bed"
+          subtitle="Add an inpatient bed unit to a hospital ward"
           maxWidth="md"
         >
-          <form onSubmit={handleCreateBed} className="space-y-4 text-xs">
+          <form onSubmit={handleCreateBed} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Bed Number / Code *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. ICU-107, GEN-206, PRV-404"
-                value={newBedNumber}
-                onChange={(e) => setNewBedNumber(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold font-mono focus:ring-2 focus:ring-purple-500 focus:bg-white text-xs"
-              />
-            </div>
-
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Assigned Ward *
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Target Ward
               </label>
               <select
+                required
                 value={newWardId}
                 onChange={(e) => setNewWardId(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-xs"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               >
                 {wards.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name} (Floor {w.floor} - {w.type})
+                  <option key={w.id} value={w.id} className="bg-slate-900 text-white">
+                    {w.name} ({w.type})
                   </option>
                 ))}
               </select>
@@ -441,111 +306,111 @@ export const BedManagement: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Initial Status
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Bed Identifier / Number
                 </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as BedStatus)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                >
-                  <option value="AVAILABLE">AVAILABLE</option>
-                  <option value="RESERVED">RESERVED</option>
-                  <option value="CLEANING">CLEANING</option>
-                  <option value="MAINTENANCE">MAINTENANCE</option>
-                </select>
+                <input
+                  type="text"
+                  required
+                  value={newBedNumber}
+                  onChange={(e) => setNewBedNumber(e.target.value)}
+                  placeholder="e.g. ICU-05, G-12"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
+                />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Daily Rate ($ USD)
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Daily Rate (USD)
                 </label>
                 <input
                   type="number"
                   min={0}
-                  step={10}
+                  required
                   value={newDailyRate}
                   onChange={(e) => setNewDailyRate(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Equipment / Notes
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Initial Status
               </label>
-              <input
-                type="text"
-                placeholder="e.g. Ventilator ready, Cardiac telemetry"
-                value={newNotes}
-                onChange={(e) => setNewNotes(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-              />
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value as BedStatus)}
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
+              >
+                <option value="AVAILABLE" className="bg-slate-900 text-white">AVAILABLE</option>
+                <option value="CLEANING" className="bg-slate-900 text-white">CLEANING</option>
+                <option value="MAINTENANCE" className="bg-slate-900 text-white">MAINTENANCE</option>
+              </select>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Creating...' : 'Create Bed Unit'}
+                {submitting ? 'Registering...' : 'Register Bed'}
               </button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* Status Change Modal */}
+      {/* Bed Status Override Modal */}
       {selectedBedForStatus && (
         <Modal
           isOpen={!!selectedBedForStatus}
           onClose={() => setSelectedBedForStatus(null)}
-          title={`Update Bed Status: ${selectedBedForStatus.bedNumber}`}
-          subtitle={`Ward: ${selectedBedForStatus.ward.name}`}
-          maxWidth="sm"
+          title={`Update Bed #${selectedBedForStatus.bedNumber}`}
+          subtitle={`Ward: ${selectedBedForStatus.ward?.name}`}
+          maxWidth="md"
         >
-          <form onSubmit={handleUpdateBedStatus} className="space-y-4 text-xs">
+          <form onSubmit={handleUpdateBedStatus} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Target Status
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Operational Status
               </label>
               <select
                 value={targetStatus}
                 onChange={(e) => setTargetStatus(e.target.value as BedStatus)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               >
-                <option value="AVAILABLE">AVAILABLE (Vacant for intake)</option>
-                <option value="RESERVED">RESERVED (Incoming patient)</option>
-                <option value="CLEANING">CLEANING (Sanitization in progress)</option>
-                <option value="MAINTENANCE">MAINTENANCE (Equipment repair)</option>
+                <option value="AVAILABLE" className="bg-slate-900 text-white">AVAILABLE</option>
+                <option value="OCCUPIED" className="bg-slate-900 text-white">OCCUPIED</option>
+                <option value="CLEANING" className="bg-slate-900 text-white">CLEANING / SANITIZING</option>
+                <option value="MAINTENANCE" className="bg-slate-900 text-white">MAINTENANCE</option>
               </select>
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Status Notes / Reason
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Maintenance / Status Notes
               </label>
-              <input
-                type="text"
-                placeholder="e.g. Disinfected at 09:30 AM"
+              <textarea
+                rows={2}
                 value={statusNotes}
                 onChange={(e) => setStatusNotes(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="e.g. Sanitized after discharge, oxygen valve check..."
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               />
             </div>
 
@@ -553,16 +418,16 @@ export const BedManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedBedForStatus(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Updating...' : 'Update Status'}
+                {submitting ? 'Updating...' : 'Save Bed Status'}
               </button>
             </div>
           </form>
@@ -571,3 +436,5 @@ export const BedManagement: React.FC = () => {
     </div>
   );
 };
+
+export default BedManagement;

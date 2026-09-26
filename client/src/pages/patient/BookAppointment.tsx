@@ -129,17 +129,19 @@ export const BookAppointment: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white select-none">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Find Specialists & Book Appointment</h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Select department, choose your preferred physician, and book your consultation in seconds.
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
+          Find Specialists & Book Consultation
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-300 mt-1">
+          Select clinical specialty, choose your physician, and book in real time.
         </p>
       </div>
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center">
         {/* Search */}
         <form onSubmit={handleSearch} className="w-full md:w-96 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -147,12 +149,12 @@ export const BookAppointment: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by doctor name, specialty, or condition..."
-            className="w-full pl-10 pr-24 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
+            placeholder="Search by physician name or specialty..."
+            className="w-full pl-10 pr-24 py-2.5 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-teal-400 focus:ring-1 focus:ring-teal-400 placeholder:text-slate-500"
           />
           <button
             type="submit"
-            className="absolute right-1.5 top-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold transition-colors"
+            className="absolute right-1.5 top-1.5 px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold transition-colors"
           >
             Search
           </button>
@@ -164,11 +166,11 @@ export const BookAppointment: React.FC = () => {
             onClick={() => handleDepartmentChange('ALL')}
             className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               selectedDept === 'ALL'
-                ? 'bg-brand-600 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-teal-500/30 text-teal-300 border border-teal-400/50 shadow-md backdrop-blur-md'
+                : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            All Departments
+            All Units
           </button>
           {departments.map((dept) => (
             <button
@@ -176,8 +178,8 @@ export const BookAppointment: React.FC = () => {
               onClick={() => handleDepartmentChange(dept.id)}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 selectedDept === dept.id
-                  ? 'bg-brand-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-teal-500/30 text-teal-300 border border-teal-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
               {dept.name}
@@ -190,12 +192,11 @@ export const BookAppointment: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {doctors.map((doc) => {
           const availableDays = doc.availableDays ? doc.availableDays.split(',') : [];
-          const slots = doc.timeSlots ? doc.timeSlots.split(',') : [];
 
           return (
             <div
               key={doc.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card hover:shadow-card-hover transition-all duration-200 flex flex-col justify-between"
+              className="bg-slate-900/45 backdrop-blur-xl rounded-3xl border border-white/15 p-5 shadow-xl hover:border-teal-400/40 transition-all duration-200 flex flex-col justify-between text-white"
             >
               <div>
                 <div className="flex items-start gap-4">
@@ -207,42 +208,42 @@ export const BookAppointment: React.FC = () => {
                       )}&background=0284c7&color=fff&bold=true`
                     }
                     alt={doc.user.name}
-                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-brand-500/20 shrink-0"
+                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-teal-500/30 shrink-0"
                   />
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-teal-300 bg-teal-500/20 px-2 py-0.5 rounded-md border border-teal-400/30">
                       {doc.department?.name || 'General Practice'}
                     </span>
-                    <h3 className="text-sm font-bold text-slate-900 mt-1">{doc.user.name}</h3>
-                    <p className="text-xs text-slate-500">{doc.qualification}</p>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1 font-medium">
-                      <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <h3 className="text-sm font-bold text-white mt-1">Dr. {doc.user.name}</h3>
+                    <p className="text-xs text-slate-300">{doc.qualification}</p>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
+                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                       <span>{doc.experienceYears} Years Exp.</span>
-                      <span className="text-slate-300">•</span>
-                      <span className="text-emerald-600 font-bold">${doc.consultationFee} Fee</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-teal-300 font-bold">${doc.consultationFee} Fee</span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-600 mt-3.5 line-clamp-2 italic">
-                  "{doc.bio || 'Experienced hospital clinical specialist dedicated to exceptional patient care.'}"
+                <p className="text-xs text-slate-300 mt-3.5 line-clamp-2 italic">
+                  "{doc.bio || 'Dedicated hospital clinical specialist providing patient care.'}"
                 </p>
 
-                <div className="mt-3.5 pt-3.5 border-t border-slate-100 space-y-2 text-xs text-slate-500">
+                <div className="mt-3.5 pt-3.5 border-t border-white/10 space-y-2 text-xs text-slate-300">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <Calendar className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                     <span className="truncate">Days: {availableDays.join(', ')}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>Location: {doc.roomNumber || 'Main OPD Block'}</span>
+                    <Building2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                    <span>Location: {doc.roomNumber || 'Consultation Suite'}</span>
                   </div>
                 </div>
               </div>
 
               <button
                 onClick={() => openBookingModal(doc)}
-                className="mt-5 w-full py-2.5 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="mt-5 w-full py-2.5 bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-500 hover:to-sky-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-teal-500/20 flex items-center justify-center gap-2 transition-all hover:scale-105 cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
                 Book Consultation Slot
@@ -257,117 +258,103 @@ export const BookAppointment: React.FC = () => {
         <Modal
           isOpen={!!selectedDoctor}
           onClose={() => setSelectedDoctor(null)}
-          title={`Book Consultation with ${selectedDoctor.user.name}`}
-          subtitle={`${selectedDoctor.specialization} (${selectedDoctor.department?.name || 'Department'})`}
+          title={`Book Consultation with Dr. ${selectedDoctor.user.name}`}
+          subtitle={`${selectedDoctor.department?.name || 'Department'} • Fee: $${selectedDoctor.consultationFee}`}
           maxWidth="lg"
         >
           {bookingSuccess ? (
-            <div className="p-6 text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
-              <h4 className="text-base font-bold text-slate-900">Appointment Request Submitted!</h4>
-              <p className="text-xs text-slate-500">
-                Your appointment request for {bookingDate} at {selectedSlot} has been sent to Dr. {selectedDoctor.user.name}. Redirecting to your appointments...
+            <div className="py-8 text-center space-y-3">
+              <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 rounded-full flex items-center justify-center mx-auto shadow-md">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Appointment Requested!</h3>
+              <p className="text-xs text-slate-300 max-w-sm mx-auto">
+                Your consultation request has been submitted to Dr. {selectedDoctor.user.name}. Redirecting to your schedule...
               </p>
             </div>
           ) : (
             <form onSubmit={handleBookSubmit} className="space-y-4">
               {error && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
-              {/* Consultation Fee Badge */}
-              <div className="p-3 bg-brand-50 border border-brand-100 rounded-xl flex items-center justify-between text-xs">
-                <span className="text-slate-600 font-medium">Standard Consultation Fee:</span>
-                <span className="text-brand-700 font-bold text-sm">${selectedDoctor.consultationFee}.00 USD</span>
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                    Select Consultation Date
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    min={new Date().toISOString().split('T')[0]}
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
+                  />
+                </div>
 
-              {/* Date selection */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Appointment Date *
-                </label>
-                <input
-                  type="date"
-                  required
-                  min={new Date().toISOString().split('T')[0]}
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
-                />
-              </div>
-
-              {/* Time slot pills */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Select Available Time Slot *
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {selectedDoctor.timeSlots.split(',').map((slot) => {
-                    const cleanSlot = slot.trim();
-                    return (
-                      <button
-                        type="button"
-                        key={cleanSlot}
-                        onClick={() => setSelectedSlot(cleanSlot)}
-                        className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all ${
-                          selectedSlot === cleanSlot
-                            ? 'bg-brand-600 text-white border-brand-600 shadow-xs'
-                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        {cleanSlot}
-                      </button>
-                    );
-                  })}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                    Available Time Slot
+                  </label>
+                  <select
+                    value={selectedSlot}
+                    onChange={(e) => setSelectedSlot(e.target.value)}
+                    className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
+                  >
+                    {selectedDoctor.timeSlots.split(',').map((slot) => (
+                      <option key={slot.trim()} value={slot.trim()} className="bg-slate-900 text-white">
+                        {slot.trim()}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* Reason for visit */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Reason for Visit *
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Reason for Consultation
                 </label>
                 <input
                   type="text"
                   required
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="e.g. Chest pain on exertion, Routine checkup, Migraine follow-up"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
+                  placeholder="e.g. Regular health checkup, persistent cough, follow-up..."
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                 />
               </div>
 
-              {/* Symptoms */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Symptoms & Duration (Optional)
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Reported Symptoms / Notes (Optional)
                 </label>
                 <textarea
                   rows={2}
                   value={symptoms}
                   onChange={(e) => setSymptoms(e.target.value)}
-                  placeholder="Describe when symptoms started and any current discomfort..."
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
+                  placeholder="Describe your symptoms or history..."
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setSelectedDoctor(null)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 disabled:opacity-70"
+                  className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-lg shadow-teal-500/20 disabled:opacity-70"
                 >
-                  {submitting ? 'Confirming...' : 'Confirm Appointment'}
+                  {submitting ? 'Confirming...' : 'Submit Booking'}
                 </button>
               </div>
             </form>
@@ -377,3 +364,5 @@ export const BookAppointment: React.FC = () => {
     </div>
   );
 };
+
+export default BookAppointment;

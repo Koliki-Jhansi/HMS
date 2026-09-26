@@ -5,6 +5,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { AppLayout } from './components/layout/AppLayout';
 
+import { LandingWelcome } from './pages/public/LandingWelcome';
+
 // Auth Pages
 import { Login } from './pages/auth/Login';
 import { Register } from './pages/auth/Register';
@@ -55,7 +57,8 @@ export const App: React.FC = () => {
       <NotificationProvider>
         <BrowserRouter>
           <Routes>
-            {/* Public Auth Routes */}
+            {/* Public Opening & Auth Routes */}
+            <Route path="/welcome" element={<LandingWelcome />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<RootRedirect />} />

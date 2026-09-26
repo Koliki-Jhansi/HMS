@@ -18,6 +18,7 @@ import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
+import { HospitalHeader3D } from '../../components/3d/HospitalHeader3D';
 
 export const AllAppointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -89,27 +90,25 @@ export const AllAppointments: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Master Appointments Ledger
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Monitor all scheduled consultations, patient queues, doctor allocations, and appointment completion rates.
-        </p>
-      </div>
+    <div className="space-y-6 text-white select-none">
+      {/* 3D Hospital Reception Header */}
+      <HospitalHeader3D
+        type="lobby"
+        badge="Hospital Reception & Appointments"
+        title="Master Appointments Ledger"
+        subtitle="Monitor all scheduled consultations, patient queues, doctor allocations, and appointment completion rates."
+      />
 
       {/* Filter & Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search patient, doctor, appointment #..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:bg-white"
+            placeholder="Search by patient, doctor, token..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder:text-slate-500"
           />
         </div>
 
@@ -118,10 +117,10 @@ export const AllAppointments: React.FC = () => {
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 statusFilter === st
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
               {st.replace('_', ' ')}
@@ -130,78 +129,57 @@ export const AllAppointments: React.FC = () => {
         </div>
       </div>
 
-      {/* Appointments Master Table */}
+      {/* Appointments Ledger Table */}
       {loading ? (
-        <LoadingSpinner text="Loading appointments ledger..." />
+        <LoadingSpinner text="Retrieving appointment ledger..." />
       ) : filtered.length === 0 ? (
         <EmptyState
           title="No appointments found"
-          description="There are no appointments matching your filter query."
+          description="No appointments match your current search and filter settings."
         />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200">
+            <table className="w-full text-left text-xs text-white">
+              <thead className="bg-slate-950/70 border-b border-white/10 text-blue-300 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="p-4">Apt #</th>
-                  <th className="p-4">Patient</th>
-                  <th className="p-4">Doctor & Department</th>
-                  <th className="p-4">Date & Time</th>
-                  <th className="p-4">Reason for Visit</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">Token & Reason</th>
+                  <th className="py-3.5 px-4">Patient</th>
+                  <th className="py-3.5 px-4">Doctor & Unit</th>
+                  <th className="py-3.5 px-4">Scheduled Slot</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4 text-right">Admin Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-white/5 bg-slate-950/20">
                 {filtered.map((apt) => (
-                  <tr key={apt.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4 font-mono font-bold text-brand-700">
-                      {apt.appointmentNumber}
+                  <tr key={apt.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-bold text-blue-300 block">{apt.appointmentNumber}</span>
+                      <span className="text-[11px] text-slate-300 line-clamp-1">{apt.reason}</span>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={
-                            apt.patient.user.avatar ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              apt.patient.user.name
-                            )}&background=0f766e&color=fff`
-                          }
-                          alt={apt.patient.user.name}
-                          className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200"
-                        />
-                        <div>
-                          <p className="font-bold text-slate-900">{apt.patient.user.name}</p>
-                          <p className="text-[10px] font-mono text-slate-400">
-                            {apt.patient.medicalRecordNumber}
-                          </p>
-                        </div>
-                      </div>
+                    <td className="py-3.5 px-4">
+                      <strong className="text-white block">{apt.patient?.user?.name}</strong>
+                      <span className="text-[11px] text-slate-400">MRN: {apt.patient?.medicalRecordNumber}</span>
                     </td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-900">Dr. {apt.doctor.user.name}</p>
-                      <p className="text-[11px] text-slate-500">{apt.doctor.department?.name || 'General'}</p>
+                    <td className="py-3.5 px-4">
+                      <strong className="text-white block">Dr. {apt.doctor?.user?.name}</strong>
+                      <span className="text-[11px] text-slate-400">{apt.doctor?.specialization}</span>
                     </td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-800">{apt.appointmentDate}</p>
-                      <p className="text-[11px] font-mono text-brand-600 font-semibold">{apt.timeSlot}</p>
+                    <td className="py-3.5 px-4">
+                      <span className="font-bold text-white block">{apt.appointmentDate}</span>
+                      <span className="text-[11px] font-mono text-blue-300">{apt.timeSlot}</span>
                     </td>
-                    <td className="p-4 max-w-[200px] truncate text-slate-600">
-                      {apt.reason}
-                    </td>
-                    <td className="p-4">
+                    <td className="py-3.5 px-4">
                       <Badge status={apt.status} size="sm" />
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => {
                           setSelectedApt(apt);
                           setTargetStatus(apt.status);
-                          setStatusNotes(apt.notes || '');
-                          setError(null);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                        className="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-bold text-xs border border-blue-400/30 transition-colors"
                       >
                         Override Status
                       </button>
@@ -214,50 +192,49 @@ export const AllAppointments: React.FC = () => {
         </div>
       )}
 
-      {/* Override Status Modal */}
+      {/* Admin Status Override Modal */}
       {selectedApt && (
         <Modal
           isOpen={!!selectedApt}
           onClose={() => setSelectedApt(null)}
-          title={`Update Appointment Status: ${selectedApt.appointmentNumber}`}
+          title={`Override Appointment #${selectedApt.appointmentNumber}`}
           subtitle={`Patient: ${selectedApt.patient?.user?.name} • Doctor: Dr. ${selectedApt.doctor?.user?.name}`}
-          maxWidth="sm"
+          maxWidth="md"
         >
-          <form onSubmit={handleUpdateStatus} className="space-y-4 text-xs">
+          <form onSubmit={handleUpdateStatus} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                 Select New Status
               </label>
               <select
                 value={targetStatus}
                 onChange={(e) => setTargetStatus(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               >
-                <option value="PENDING">PENDING</option>
-                <option value="ACCEPTED">ACCEPTED</option>
-                <option value="IN_PROGRESS">IN_PROGRESS</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="CANCELLED">CANCELLED</option>
-                <option value="REJECTED">REJECTED</option>
+                {['PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'REJECTED'].map((st) => (
+                  <option key={st} value={st} className="bg-slate-900 text-white">
+                    {st.replace('_', ' ')}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Admin Notes / Reason
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Administrative Notes (Optional)
               </label>
               <textarea
                 rows={3}
-                placeholder="Administrative override explanation..."
                 value={statusNotes}
                 onChange={(e) => setStatusNotes(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="Reason for administrative override..."
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               />
             </div>
 
@@ -265,16 +242,16 @@ export const AllAppointments: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedApt(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Updating...' : 'Save Status'}
+                {submitting ? 'Updating...' : 'Save Override'}
               </button>
             </div>
           </form>
@@ -283,3 +260,5 @@ export const AllAppointments: React.FC = () => {
     </div>
   );
 };
+
+export default AllAppointments;

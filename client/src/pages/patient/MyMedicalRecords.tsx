@@ -16,6 +16,7 @@ import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
+import { HospitalHeader3D } from '../../components/3d/HospitalHeader3D';
 
 export const MyMedicalRecords: React.FC = () => {
   const [records, setRecords] = useState<MedicalRecord[]>([]);
@@ -54,19 +55,17 @@ export const MyMedicalRecords: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Electronic Health Records (EHR)
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Complete medical history, diagnostic reports, surgical notes, and discharge summaries.
-        </p>
-      </div>
+    <div className="space-y-6 text-white select-none">
+      {/* 3D Digital Clinical Matrix Header */}
+      <HospitalHeader3D
+        type="records"
+        badge="Digital EHR Matrix"
+        title="Electronic Health Records (EHR)"
+        subtitle="Complete medical history, diagnostic reports, surgical notes, and discharge summaries."
+      />
 
       {/* Controls Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         {/* Search */}
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -75,7 +74,7 @@ export const MyMedicalRecords: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search records, notes, keywords..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-teal-400 focus:ring-1 focus:ring-teal-400 placeholder:text-slate-500"
           />
         </div>
 
@@ -87,8 +86,8 @@ export const MyMedicalRecords: React.FC = () => {
               onClick={() => setTypeFilter(t)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 typeFilter === t
-                  ? 'bg-brand-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-teal-500/30 text-teal-300 border border-teal-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
               {t.replace('_', ' ')}
@@ -99,58 +98,48 @@ export const MyMedicalRecords: React.FC = () => {
 
       {/* Records Timeline */}
       {loading ? (
-        <LoadingSpinner text="Loading your medical history..." />
+        <LoadingSpinner text="Querying digital health record vault..." />
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No health records found"
-          description="There are no documented clinical notes matching your current filter."
+          title="No medical records found"
+          description="Clinical records, diagnoses, and lab results will appear here as they are filed."
         />
       ) : (
         <div className="space-y-4">
-          {filtered.map((record) => (
+          {filtered.map((rec) => (
             <div
-              key={record.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card hover:shadow-card-hover transition-all"
+              key={rec.id}
+              className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-5 shadow-xl hover:border-teal-400/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 text-white"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-brand-50 text-brand-600 border border-brand-100">
-                    <ClipboardList className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-slate-900">{record.title}</h3>
-                      <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-semibold">
-                        {record.recordNumber}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Attending: Dr. {record.doctor?.user?.name || 'Medical Staff'} ({record.doctor?.department?.name || 'General'})
-                    </p>
-                  </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-teal-500/20 text-teal-300 border border-teal-400/30 rounded-2xl shrink-0 mt-1">
+                  <ClipboardList className="w-6 h-6" />
                 </div>
-
-                <div className="flex items-center gap-3 self-start sm:self-center">
-                  <Badge status={record.recordType} size="sm" />
-                  <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" /> {record.recordDate}
-                  </span>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-mono font-bold bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-md border border-teal-400/30">
+                      {rec.recordNumber}
+                    </span>
+                    <Badge status={rec.recordType} size="sm" />
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-teal-400" />
+                      {new Date(rec.recordDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-white mt-1.5">{rec.title}</h3>
+                  <p className="text-xs text-slate-300 mt-1 line-clamp-2">{rec.notes}</p>
+                  <p className="text-[11px] text-teal-300/80 mt-1.5 font-medium">
+                    Attending: Dr. {rec.doctor?.user?.name || 'Staff Physician'} ({rec.doctor?.specialization || 'General'})
+                  </p>
                 </div>
               </div>
 
-              <div className="mt-3 text-xs text-slate-700 bg-slate-50/70 p-3.5 rounded-xl border border-slate-100 leading-relaxed">
-                <span className="font-bold text-slate-500 uppercase tracking-wider block mb-1">
-                  Clinical Notes & Findings
-                </span>
-                <p className="whitespace-pre-line">{record.notes}</p>
-              </div>
-
-              <div className="mt-3 flex justify-end">
+              <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                 <button
-                  onClick={() => setSelectedRecord(record)}
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  onClick={() => setSelectedRecord(rec)}
+                  className="px-4 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 font-bold text-xs border border-teal-400/30 flex items-center gap-1.5 transition-colors"
                 >
-                  <Eye className="w-3.5 h-3.5" />
+                  <Eye className="w-4 h-4" />
                   View Full Record
                 </button>
               </div>
@@ -159,40 +148,51 @@ export const MyMedicalRecords: React.FC = () => {
         </div>
       )}
 
-      {/* Detail Modal */}
+      {/* Record Details Modal */}
       {selectedRecord && (
         <Modal
           isOpen={!!selectedRecord}
           onClose={() => setSelectedRecord(null)}
           title={selectedRecord.title}
-          subtitle={`Record #${selectedRecord.recordNumber} • Date: ${selectedRecord.recordDate}`}
-          maxWidth="lg"
+          subtitle={`Record #${selectedRecord.recordNumber} • Date: ${new Date(selectedRecord.recordDate).toLocaleDateString()}`}
+          maxWidth="2xl"
         >
-          <div className="space-y-4 text-xs">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+          <div className="space-y-4 text-white">
+            <div className="grid grid-cols-2 gap-3 text-xs bg-slate-950/40 p-3.5 rounded-2xl border border-white/10">
               <div>
-                <p className="font-bold text-slate-700">Documenting Physician</p>
-                <p className="text-slate-900 font-semibold mt-0.5">
-                  Dr. {selectedRecord.doctor?.user?.name || 'Hospital Clinical Team'}
-                </p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Record Category</span>
+                <span className="font-bold text-white">{selectedRecord.recordType.replace('_', ' ')}</span>
               </div>
-              <Badge status={selectedRecord.recordType} size="md" />
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Authoring Specialist</span>
+                <span className="font-bold text-white">Dr. {selectedRecord.doctor?.user?.name || 'Staff Physician'}</span>
+              </div>
             </div>
 
             <div>
-              <span className="font-bold text-slate-700 uppercase tracking-wider block mb-1">
-                Comprehensive Clinical Documentation
-              </span>
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 text-slate-800 leading-relaxed text-xs">
+              <h4 className="text-xs font-bold text-teal-300 uppercase tracking-wider mb-1">
+                Clinical Examination & Findings
+              </h4>
+              <div className="p-4 bg-slate-950/40 rounded-2xl border border-white/10 text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
                 {selectedRecord.notes}
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            {((selectedRecord as any).diagnosis || (selectedRecord as any).chiefComplaint) && (
+              <div>
+                <h4 className="text-xs font-bold text-teal-300 uppercase tracking-wider mb-1">
+                  Confirmed Diagnosis / Findings
+                </h4>
+                <div className="p-3 bg-teal-500/10 border border-teal-400/20 rounded-xl text-xs font-semibold text-teal-200">
+                  {(selectedRecord as any).diagnosis || (selectedRecord as any).chiefComplaint}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-2 border-t border-white/10">
               <button
-                type="button"
                 onClick={() => setSelectedRecord(null)}
-                className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs"
+                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow-md"
               >
                 Close Record
               </button>
@@ -203,3 +203,5 @@ export const MyMedicalRecords: React.FC = () => {
     </div>
   );
 };
+
+export default MyMedicalRecords;

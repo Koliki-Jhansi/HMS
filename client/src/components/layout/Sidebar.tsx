@@ -54,36 +54,36 @@ export const Sidebar: React.FC = () => {
     role === 'ADMIN' ? adminNav : role === 'DOCTOR' ? doctorNav : patientNav;
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200/80 min-h-[calc(100vh-4rem)] flex flex-col justify-between py-6 px-4 shrink-0 shadow-xs hidden md:flex">
+    <aside className="w-64 bg-slate-950/40 backdrop-blur-xl border-r border-white/10 min-h-[calc(100vh-4rem)] flex flex-col justify-between py-6 px-4 shrink-0 hidden md:flex z-20 select-none">
       <div className="space-y-6">
-        {/* Role Badge Card */}
-        <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50/50 border border-slate-100 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-white shadow-xs border border-slate-100 flex items-center justify-center text-brand-600">
+        {/* Minimal Role Indicator */}
+        <div className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400">
             {role === 'ADMIN' ? (
-              <ShieldCheck className="w-5 h-5 text-purple-600" />
+              <ShieldCheck className="w-4 h-4 text-blue-400" />
             ) : role === 'DOCTOR' ? (
-              <Stethoscope className="w-5 h-5 text-brand-600" />
+              <Stethoscope className="w-4 h-4 text-cyan-400" />
             ) : (
-              <HeartPulse className="w-5 h-5 text-teal-600" />
+              <HeartPulse className="w-4 h-4 text-teal-400" />
             )}
           </div>
           <div className="overflow-hidden">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-              Active Portal
+              Portal
             </span>
-            <span className="text-xs font-bold text-slate-800 truncate block">
+            <span className="text-xs font-bold text-white truncate block">
               {role === 'ADMIN'
-                ? 'Administration HQ'
+                ? 'Operations HQ'
                 : role === 'DOCTOR'
-                ? 'Physician Workspace'
-                : 'Patient Health Desk'}
+                ? 'Clinical Suite'
+                : 'Patient Care'}
             </span>
           </div>
         </div>
 
         {/* Navigation list */}
         <div className="space-y-1">
-          <span className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+          <span className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
             Navigation
           </span>
           {currentNav.map((item) => {
@@ -96,12 +96,12 @@ export const Sidebar: React.FC = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                     isActive
-                      ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                      ? 'bg-sky-500/25 border border-sky-400/40 text-white shadow-md shadow-sky-500/20 backdrop-blur-md'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
                   }`
                 }
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className="w-4 h-4 shrink-0 text-sky-400" />
                 <span className="truncate">{item.name}</span>
               </NavLink>
             );
@@ -109,15 +109,16 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Hospital contact info card */}
-      <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-        <div className="flex items-center gap-2 text-slate-700">
-          <Hospital className="w-4 h-4 text-brand-600" />
-          <span className="text-xs font-bold">24/7 Helpline</span>
+      {/* Hospital contact info pill */}
+      <div className="p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-xs">
+        <div className="flex items-center gap-2 text-slate-200">
+          <Hospital className="w-4 h-4 text-sky-400" />
+          <span className="font-bold text-[11px]">HIRO Medical Hub</span>
         </div>
-        <p className="text-[11px] text-slate-500 mt-1">Emergency: +1 (800) 555-0199</p>
-        <p className="text-[11px] text-slate-400">Main Line: +1 (555) 019-2831</p>
+        <p className="text-[10px] text-slate-400 mt-1">24/7 Helpline: +1 (800) 555-0199</p>
       </div>
     </aside>
   );
 };
+
+export default Sidebar;

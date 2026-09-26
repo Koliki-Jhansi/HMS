@@ -41,42 +41,39 @@ export const Navbar: React.FC = () => {
     navigate('/login', { replace: true });
   };
 
-
   return (
-    <header className="sticky top-0 z-40 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between shadow-xs">
+    <header className="sticky top-0 z-40 h-16 bg-slate-950/40 backdrop-blur-xl border-b border-white/10 px-4 lg:px-8 flex items-center justify-between text-white select-none">
       {/* Brand */}
       <div className="flex items-center gap-3">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
-            <Activity className="w-6 h-6 stroke-[2.5]" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-teal-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
+            <Activity className="w-5 h-5 stroke-[2.5]" />
           </div>
           <div>
-            <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-brand-900 via-brand-700 to-teal-700 bg-clip-text text-transparent">
-              MedPulse
+            <span className="text-base sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-sky-200 to-teal-200 bg-clip-text text-transparent">
+              HIRO HOSPITAL
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider block text-slate-400 -mt-1">
-              Hospital Care Suite
+            <span className="text-[9px] font-bold uppercase tracking-wider block text-sky-400 -mt-0.5">
+              Digital Care Suite
             </span>
           </div>
         </Link>
 
         {/* Live status badge */}
-        <div className="hidden sm:flex items-center gap-2 ml-4 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[11px] font-semibold text-emerald-700">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-status-pulse" />
-          <span>Live Hospital Systems Active</span>
+        <div className="hidden sm:flex items-center gap-2 ml-4 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-[11px] font-semibold text-emerald-300 backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>3D Hospital Engine Live</span>
         </div>
       </div>
 
       {/* Right controls */}
       <div className="flex items-center gap-3">
-
-
         {/* Notification Bell */}
         {user && (
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setShowNotifs(!showNotifs)}
-              className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors focus:outline-none"
+              className="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors focus:outline-none"
               title="Notifications"
             >
               <Bell className="w-5 h-5" />
@@ -89,12 +86,12 @@ export const Navbar: React.FC = () => {
 
             {/* Notification Dropdown */}
             {showNotifs && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
-                <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-slate-900/95 backdrop-blur-2xl shadow-2xl border border-white/15 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 text-white">
+                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-slate-950/60">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-slate-800 text-sm">Notifications</h4>
+                    <h4 className="font-bold text-white text-sm">Notifications</h4>
                     {unreadCount > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-100 text-brand-700">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30">
                         {unreadCount} new
                       </span>
                     )}
@@ -102,7 +99,7 @@ export const Navbar: React.FC = () => {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-xs font-semibold text-brand-600 hover:text-brand-800 flex items-center gap-1"
+                      className="text-xs font-semibold text-sky-400 hover:text-sky-300 flex items-center gap-1"
                     >
                       <CheckCheck className="w-3.5 h-3.5" />
                       Mark all read
@@ -110,7 +107,7 @@ export const Navbar: React.FC = () => {
                   )}
                 </div>
 
-                <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                <div className="max-h-80 overflow-y-auto divide-y divide-white/10">
                   {notifications.length === 0 ? (
                     <div className="p-8 text-center text-xs text-slate-400">
                       No notifications yet
@@ -124,17 +121,17 @@ export const Navbar: React.FC = () => {
                           if (n.link) navigate(n.link);
                           setShowNotifs(false);
                         }}
-                        className={`p-3.5 hover:bg-slate-50 cursor-pointer transition-colors ${
-                          !n.isRead ? 'bg-brand-50/40' : ''
+                        className={`p-3.5 hover:bg-white/5 cursor-pointer transition-colors ${
+                          !n.isRead ? 'bg-sky-500/10' : ''
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-xs font-bold text-slate-800">{n.title}</span>
+                          <span className="text-xs font-bold text-white">{n.title}</span>
                           {!n.isRead && (
-                            <span className="w-2 h-2 rounded-full bg-brand-500 shrink-0 mt-1" />
+                            <span className="w-2 h-2 rounded-full bg-sky-400 shrink-0 mt-1" />
                           )}
                         </div>
-                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">{n.message}</p>
+                        <p className="text-xs text-slate-300 mt-1 line-clamp-2">{n.message}</p>
                         <span className="text-[10px] text-slate-400 mt-1.5 block">
                           {new Date(n.createdAt).toLocaleTimeString([], {
                             hour: '2-digit',
@@ -155,7 +152,7 @@ export const Navbar: React.FC = () => {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none"
+              className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-white/10 transition-colors focus:outline-none"
             >
               <img
                 src={
@@ -165,23 +162,23 @@ export const Navbar: React.FC = () => {
                   )}&background=0284c7&color=fff&bold=true`
                 }
                 alt={user.name}
-                className="w-8 h-8 rounded-lg object-cover ring-2 ring-brand-500/20"
+                className="w-8 h-8 rounded-lg object-cover ring-2 ring-sky-400/40"
               />
               <div className="hidden lg:block text-left">
-                <div className="text-xs font-bold text-slate-800 leading-tight flex items-center gap-1.5">
+                <div className="text-xs font-bold text-white leading-tight flex items-center gap-1.5">
                   {user.name}
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">{user.role}</div>
+                <div className="text-[10px] text-sky-400 font-medium">{user.role}</div>
               </div>
             </button>
 
             {/* User Dropdown */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 p-1.5">
-                <div className="px-3 py-2.5 border-b border-slate-100 mb-1">
-                  <p className="text-xs font-bold text-slate-900">{user.name}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900/95 backdrop-blur-2xl shadow-2xl border border-white/15 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 p-1.5 text-white">
+                <div className="px-3 py-2.5 border-b border-white/10 mb-1">
+                  <p className="text-xs font-bold text-white">{user.name}</p>
+                  <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
                   <div className="mt-1.5">
                     <Badge status={user.role} size="sm" />
                   </div>
@@ -197,15 +194,15 @@ export const Navbar: React.FC = () => {
                         : '/patient'
                     }
                     onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-white/10 rounded-xl transition-colors"
                   >
-                    <UserIcon className="w-4 h-4 text-slate-500" />
+                    <UserIcon className="w-4 h-4 text-sky-400" />
                     My Portal Dashboard
                   </Link>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors text-left"
                   >
                     <LogOut className="w-4 h-4" />
                     Sign Out
@@ -218,13 +215,13 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-2">
             <Link
               to="/login"
-              className="px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-bold text-white hover:bg-white/10 rounded-xl transition-colors"
             >
               Sign In
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-xs transition-colors"
+              className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-xl shadow-xs transition-colors"
             >
               Register
             </Link>
@@ -234,3 +231,5 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
+
+export default Navbar;

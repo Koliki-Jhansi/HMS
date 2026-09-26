@@ -98,6 +98,7 @@ export const UserManagement: React.FC = () => {
         role: targetRole,
         status: targetStatus,
       });
+
       if (res.data.success) {
         setEditingUser(null);
         fetchUsers();
@@ -109,35 +110,21 @@ export const UserManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!window.confirm('Are you sure you want to delete this user account?')) return;
-    try {
-      await api.delete(`/users/${userId}`);
-      fetchUsers();
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete user');
-    }
-  };
-
-  const filtered = users.filter((u) => {
+  const filteredUsers = users.filter((u) => {
     const q = searchQuery.toLowerCase();
-    return (
-      u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      (u.phone && u.phone.toLowerCase().includes(q))
-    );
+    return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white select-none">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            User Accounts & Security Authorization
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
+            Staff & User Access Control
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage hospital staff credentials, system administrators, role-based permissions, and access status.
+          <p className="text-xs sm:text-sm text-slate-300 mt-1">
+            Manage hospital accounts, security roles, access permissions, and authentication credentials.
           </p>
         </div>
 
@@ -146,23 +133,23 @@ export const UserManagement: React.FC = () => {
             setShowAddModal(true);
             setError(null);
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-purple-500/20 transition-all self-start"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 self-start"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 stroke-[3]" />
           Create Staff Account
         </button>
       </div>
 
-      {/* Filters Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      {/* Filter & Search Bar */}
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, email, phone..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:bg-white"
+            placeholder="Search by name or email..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder:text-slate-500"
           />
         </div>
 
@@ -173,11 +160,11 @@ export const UserManagement: React.FC = () => {
               onClick={() => setRoleFilter(r)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 roleFilter === r
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              {r === 'ALL' ? 'All Roles' : r}
+              {r}
             </button>
           ))}
         </div>
@@ -185,78 +172,64 @@ export const UserManagement: React.FC = () => {
 
       {/* Users Table */}
       {loading ? (
-        <LoadingSpinner text="Loading user directory..." />
-      ) : filtered.length === 0 ? (
+        <LoadingSpinner text="Retrieving registered system users..." />
+      ) : filteredUsers.length === 0 ? (
         <EmptyState
           title="No users found"
-          description="There are no users registered matching your search."
+          description="No user accounts match your search and filter criteria."
         />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200">
+            <table className="w-full text-left text-xs text-white">
+              <thead className="bg-slate-950/70 border-b border-white/10 text-blue-300 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="p-4">User</th>
-                  <th className="p-4">Email Address</th>
-                  <th className="p-4">Assigned Role</th>
-                  <th className="p-4">Contact Phone</th>
-                  <th className="p-4">Account Status</th>
-                  <th className="p-4">Registered Date</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">User</th>
+                  <th className="py-3.5 px-4">Role</th>
+                  <th className="py-3.5 px-4">Phone</th>
+                  <th className="py-3.5 px-4">Created Date</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {filtered.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            u.avatar ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              u.name
-                            )}&background=0284c7&color=fff&bold=true`
-                          }
-                          alt={u.name}
-                          className="w-10 h-10 rounded-xl object-cover ring-2 ring-slate-200"
-                        />
-                        <p className="font-bold text-slate-900 text-sm">{u.name}</p>
+              <tbody className="divide-y divide-white/5 bg-slate-950/20">
+                {filteredUsers.map((u) => (
+                  <tr key={u.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 px-4 flex items-center gap-3">
+                      <img
+                        src={
+                          u.avatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            u.name
+                          )}&background=0284c7&color=fff&bold=true`
+                        }
+                        alt={u.name}
+                        className="w-10 h-10 rounded-xl object-cover ring-1 ring-blue-500/30"
+                      />
+                      <div>
+                        <strong className="text-white block">{u.name}</strong>
+                        <span className="text-[11px] text-slate-400">{u.email}</span>
                       </div>
                     </td>
-                    <td className="p-4 text-slate-600">{u.email}</td>
-                    <td className="p-4">
+                    <td className="py-3.5 px-4">
                       <Badge status={u.role} size="sm" />
                     </td>
-                    <td className="p-4 text-slate-600">{u.phone || 'N/A'}</td>
-                    <td className="p-4">
-                      <Badge status={u.status} size="sm" />
+                    <td className="py-3.5 px-4 text-slate-300">
+                      {u.phone || 'Phone not set'}
                     </td>
-                    <td className="p-4 text-slate-400">
+                    <td className="py-3.5 px-4 text-slate-300">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setEditingUser(u);
-                            setTargetRole(u.role);
-                            setTargetStatus(u.status);
-                            setError(null);
-                          }}
-                          className="p-2 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-colors"
-                          title="Edit User Role/Status"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(u.id)}
-                          className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                          title="Delete User Account"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        onClick={() => {
+                          setEditingUser(u);
+                          setTargetRole(u.role);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-bold text-xs border border-blue-400/30 flex items-center gap-1 ml-auto transition-colors"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                        Edit Access
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -271,150 +244,137 @@ export const UserManagement: React.FC = () => {
         <Modal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
-          title="Create New System Staff Account"
-          subtitle="Assign roles for Hospital Administrators or Medical Staff"
+          title="Create Staff User"
+          subtitle="Provision administrative or clinical portal credentials"
           maxWidth="md"
         >
-          <form onSubmit={handleCreateStaff} className="space-y-4 text-xs">
+          <form onSubmit={handleCreateStaff} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                 Full Name *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Johnathan Vance"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="e.g. John Doe"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                 Email Address *
               </label>
               <input
                 type="email"
                 required
-                placeholder="vance@hospital.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="staff@hospital.com"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               />
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Initial Password *
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Temporary Password *
               </label>
               <input
                 type="password"
                 required
-                minLength={6}
-                placeholder="Min 6 characters"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="••••••••"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               />
             </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                placeholder="+1 (555) 019-3300"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-              />
-            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Access Role
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
+                >
+                  <option value="ADMIN" className="bg-slate-900 text-white">ADMIN</option>
+                  <option value="DOCTOR" className="bg-slate-900 text-white">DOCTOR</option>
+                  <option value="PATIENT" className="bg-slate-900 text-white">PATIENT</option>
+                </select>
+              </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Role Assignment *
-              </label>
-              <select
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
-              >
-                <option value="ADMIN">ADMIN (Full Hospital HQ Access)</option>
-                <option value="DOCTOR">DOCTOR (Physician Workspace)</option>
-                <option value="PATIENT">PATIENT (Health Portal)</option>
-              </select>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Phone (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+1 (555)..."
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Creating...' : 'Create Staff Account'}
+                {submitting ? 'Creating...' : 'Create Account'}
               </button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* Edit User Role / Status Modal */}
+      {/* Edit User Modal */}
       {editingUser && (
         <Modal
           isOpen={!!editingUser}
           onClose={() => setEditingUser(null)}
-          title={`Edit Account: ${editingUser.name}`}
-          subtitle={`Email: ${editingUser.email}`}
-          maxWidth="sm"
+          title={`Edit User: ${editingUser.name}`}
+          subtitle={`Account Email: ${editingUser.email}`}
+          maxWidth="md"
         >
-          <form onSubmit={handleUpdateUser} className="space-y-4 text-xs">
+          <form onSubmit={handleUpdateUser} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Role Assignment
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Assigned Security Role
               </label>
               <select
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value as Role)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               >
-                <option value="ADMIN">ADMIN</option>
-                <option value="DOCTOR">DOCTOR</option>
-                <option value="PATIENT">PATIENT</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Account Status
-              </label>
-              <select
-                value={targetStatus}
-                onChange={(e) => setTargetStatus(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
-              >
-                <option value="ACTIVE">ACTIVE (Authorized to log in)</option>
-                <option value="INACTIVE">INACTIVE (Deactivated / Blocked)</option>
+                <option value="ADMIN" className="bg-slate-900 text-white">ADMIN (Operations & Admin)</option>
+                <option value="DOCTOR" className="bg-slate-900 text-white">DOCTOR (Clinical Suite)</option>
+                <option value="PATIENT" className="bg-slate-900 text-white">PATIENT (Health Portal)</option>
               </select>
             </div>
 
@@ -422,16 +382,16 @@ export const UserManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Saving...' : 'Save User Settings'}
+                {submitting ? 'Updating...' : 'Save Permissions'}
               </button>
             </div>
           </form>
@@ -440,3 +400,5 @@ export const UserManagement: React.FC = () => {
     </div>
   );
 };
+
+export default UserManagement;

@@ -83,40 +83,37 @@ export const DoctorSchedule: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl text-white select-none">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
           Working Hours & Slot Settings
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Define the working days, time slots, room location, and consultation fee visible to patients booking online.
+        <p className="text-xs sm:text-sm text-slate-300 mt-1">
+          Define working days, time slots, room location, and consultation fee visible to patients.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+          <div className="p-4 rounded-2xl bg-rose-950/50 border border-rose-500/40 text-xs text-rose-300 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-            <span>Your schedule and consultation settings have been successfully updated!</span>
+          <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-xs text-emerald-300 flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 shrink-0" />
+            <span>Schedule parameters updated successfully!</span>
           </div>
         )}
 
-        {/* Working Days */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-card space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Calendar className="w-5 h-5 text-brand-600" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Available Consulting Days</h3>
-              <p className="text-xs text-slate-500">Select the days you are available for OPD consultations</p>
-            </div>
+        {/* Available Working Days */}
+        <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 text-cyan-300">
+            <Calendar className="w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Weekly Availability</h3>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
@@ -127,14 +124,16 @@ export const DoctorSchedule: React.FC = () => {
                   type="button"
                   key={day}
                   onClick={() => toggleDay(day)}
-                  className={`p-3 rounded-2xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
+                  className={`p-3 rounded-2xl text-xs font-bold transition-all ${
                     isSelected
-                      ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-500/20'
-                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-md backdrop-blur-md'
+                      : 'bg-slate-950/40 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span>{day.slice(0, 3)}</span>
-                  <span className="text-[10px] font-normal">{isSelected ? 'Active' : 'Off'}</span>
+                  {day.slice(0, 3)}
+                  <span className="block text-[10px] font-normal opacity-80 mt-0.5">
+                    {isSelected ? 'Active' : 'Off'}
+                  </span>
                 </button>
               );
             })}
@@ -142,107 +141,92 @@ export const DoctorSchedule: React.FC = () => {
         </div>
 
         {/* Time Slots */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-card space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Clock className="w-5 h-5 text-brand-600" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Daily Consultation Time Slots</h3>
-              <p className="text-xs text-slate-500">Define the bookable appointment slots per working day</p>
-            </div>
+        <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-6 shadow-xl space-y-4">
+          <div className="flex items-center gap-2 text-cyan-300">
+            <Clock className="w-5 h-5" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Consultation Slots</h3>
           </div>
 
-          {/* Add slot input */}
-          <div className="flex gap-2 max-w-sm">
+          <div className="flex flex-wrap gap-2">
+            {timeSlots.map((slot) => (
+              <div
+                key={slot}
+                className="px-3 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold flex items-center gap-2"
+              >
+                <span>{slot}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSlot(slot)}
+                  className="text-slate-400 hover:text-rose-400"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 max-w-sm pt-2">
             <input
               type="text"
-              placeholder="e.g. 11:30 AM or 04:00 PM"
               value={newSlot}
               onChange={(e) => setNewSlot(e.target.value)}
-              className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-brand-500 w-full"
+              placeholder="e.g. 02:30 PM"
+              className="w-full p-2.5 bg-slate-950/50 border border-white/15 rounded-xl text-xs text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder:text-slate-500"
             />
             <button
               type="button"
               onClick={handleAddSlot}
-              className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold whitespace-nowrap"
+              className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl transition-colors whitespace-nowrap"
             >
               Add Slot
             </button>
           </div>
+        </div>
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            {timeSlots.map((slot) => (
-              <span
-                key={slot}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold border border-slate-200"
-              >
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                {slot}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveSlot(slot)}
-                  className="text-slate-400 hover:text-rose-600 font-bold ml-1"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
+        {/* Room & Fee Meta */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-6 shadow-xl space-y-2">
+            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-cyan-400" />
+              Room / Suite Location
+            </label>
+            <input
+              type="text"
+              value={roomNumber}
+              onChange={(e) => setRoomNumber(e.target.value)}
+              placeholder="e.g. Suite 204, Wing B"
+              className="w-full p-2.5 bg-slate-950/50 border border-white/15 rounded-xl text-xs text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+            />
+          </div>
+
+          <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-6 shadow-xl space-y-2">
+            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-cyan-400" />
+              Consultation Fee (USD)
+            </label>
+            <input
+              type="number"
+              min={0}
+              value={consultationFee}
+              onChange={(e) => setConsultationFee(Number(e.target.value))}
+              className="w-full p-2.5 bg-slate-950/50 border border-white/15 rounded-xl text-xs text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+            />
           </div>
         </div>
 
-        {/* Room & Fee */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-card space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Building2 className="w-5 h-5 text-brand-600" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Room Location & Consultation Fee</h3>
-              <p className="text-xs text-slate-500">Physical OPD suite and patient billing rate</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Consultation Room / Suite Number
-              </label>
-              <input
-                type="text"
-                required
-                value={roomNumber}
-                onChange={(e) => setRoomNumber(e.target.value)}
-                placeholder="e.g. Suite 301 (Cardiac Wing)"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 font-medium"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Standard Consultation Fee ($ USD)
-              </label>
-              <input
-                type="number"
-                min={0}
-                step={5}
-                required
-                value={consultationFee}
-                onChange={(e) => setConsultationFee(Number(e.target.value))}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 font-bold text-slate-900"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Submit */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-3 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/25 flex items-center gap-2 disabled:opacity-70 cursor-pointer"
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/20 flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-70 cursor-pointer"
           >
             <Save className="w-4 h-4" />
-            {saving ? 'Saving Changes...' : 'Save Schedule Settings'}
+            {saving ? 'Saving Schedule...' : 'Save Schedule Settings'}
           </button>
         </div>
       </form>
     </div>
   );
 };
+
+export default DoctorSchedule;

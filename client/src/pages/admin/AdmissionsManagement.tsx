@@ -208,14 +208,14 @@ export const AdmissionsManagement: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white select-none">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
             Patient Admissions & Discharge Hub
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-300 mt-1">
             Manage inpatient registrations, automated bed allocations, ward transfers, and clinical discharge summaries.
           </p>
         </div>
@@ -226,15 +226,15 @@ export const AdmissionsManagement: React.FC = () => {
             fetchMetadata();
             setError(null);
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-purple-500/20 transition-all self-start"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105 self-start"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 stroke-[3]" />
           Admit Patient
         </button>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
@@ -242,7 +242,7 @@ export const AdmissionsManagement: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search patient, admission #, bed..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:bg-white"
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder:text-slate-500"
           />
         </div>
 
@@ -251,92 +251,74 @@ export const AdmissionsManagement: React.FC = () => {
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 statusFilter === st
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              {st === 'ACTIVE' ? 'Active Inpatients' : st === 'DISCHARGED' ? 'Discharged History' : 'All Admissions'}
+              {st}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Admissions Table */}
+      {/* Admissions Table in Glass */}
       {loading ? (
-        <LoadingSpinner text="Fetching admissions registry..." />
+        <LoadingSpinner text="Querying active inpatient admissions..." />
       ) : filteredAdmissions.length === 0 ? (
         <EmptyState
           title="No admissions found"
-          description="There are currently no patients matching your filter in the admissions ledger."
+          description="Click 'Admit Patient' to assign a registered patient to an available ward bed."
         />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200">
+            <table className="w-full text-left text-xs text-white">
+              <thead className="bg-slate-950/70 border-b border-white/10 text-blue-300 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="p-4">Admission #</th>
-                  <th className="p-4">Patient Details</th>
-                  <th className="p-4">Ward & Bed Unit</th>
-                  <th className="p-4">Attending Doctor</th>
-                  <th className="p-4">Admission Date</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">Admission Details</th>
+                  <th className="py-3.5 px-4">Patient</th>
+                  <th className="py-3.5 px-4">Ward & Bed</th>
+                  <th className="py-3.5 px-4">Attending Doctor</th>
+                  <th className="py-3.5 px-4">Admitted At</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              <tbody className="divide-y divide-white/5 bg-slate-950/20">
                 {filteredAdmissions.map((adm) => (
-                  <tr key={adm.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4 font-mono font-bold text-brand-700">
-                      {adm.admissionNumber}
+                  <tr key={adm.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-bold text-blue-300 block">{adm.admissionNumber}</span>
+                      <span className="text-[11px] text-slate-300 line-clamp-1">{adm.reason}</span>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={
-                            adm.patient.user.avatar ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              adm.patient.user.name
-                            )}&background=0f766e&color=fff`
-                          }
-                          alt={adm.patient.user.name}
-                          className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200"
-                        />
-                        <div>
-                          <p className="font-bold text-slate-900">{adm.patient.user.name}</p>
-                          <p className="text-[10px] font-mono text-slate-400">
-                            {adm.patient.medicalRecordNumber}
-                          </p>
-                        </div>
-                      </div>
+                    <td className="py-3.5 px-4">
+                      <strong className="text-white block">{adm.patient.user.name}</strong>
+                      <span className="text-[11px] text-slate-400">MRN: {adm.patient.medicalRecordNumber}</span>
                     </td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-900">{adm.bed.ward.name}</p>
-                      <p className="text-[11px] font-mono text-purple-700 font-bold">
-                        Bed #{adm.bed.bedNumber} ({adm.bed.ward.type})
-                      </p>
+                    <td className="py-3.5 px-4">
+                      <span className="font-bold text-white block">{adm.bed?.ward?.name}</span>
+                      <span className="text-[11px] text-blue-300 font-mono">Bed #{adm.bed?.bedNumber}</span>
                     </td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-900">Dr. {adm.doctor.user.name}</p>
-                      <p className="text-[11px] text-slate-500">{adm.doctor.department?.name || 'General'}</p>
+                    <td className="py-3.5 px-4 text-slate-300">
+                      Dr. {adm.doctor?.user?.name}
                     </td>
-                    <td className="p-4 text-slate-600">
+                    <td className="py-3.5 px-4 text-slate-300">
                       {new Date(adm.admissionDate).toLocaleDateString()}
                     </td>
-                    <td className="p-4">
+                    <td className="py-3.5 px-4">
                       <Badge status={adm.status} size="sm" />
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       {adm.status === 'ACTIVE' && (
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
                               setTransferTarget(adm);
-                              setError(null);
+                              fetchMetadata();
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-bold text-[11px] border border-blue-400/30 flex items-center gap-1"
                             title="Transfer Bed"
                           >
                             <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -344,17 +326,13 @@ export const AdmissionsManagement: React.FC = () => {
                           </button>
                           <button
                             onClick={() => openDischargeModal(adm)}
-                            className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-colors"
+                            className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold text-[11px] border border-rose-400/30 flex items-center gap-1"
+                            title="Discharge Patient"
                           >
                             <LogOut className="w-3.5 h-3.5" />
                             Discharge
                           </button>
                         </div>
-                      )}
-                      {adm.status === 'DISCHARGED' && (
-                        <span className="text-[11px] text-slate-400 italic">
-                          Discharged {adm.dischargeDate ? new Date(adm.dischargeDate).toLocaleDateString() : ''}
-                        </span>
                       )}
                     </td>
                   </tr>
@@ -370,107 +348,101 @@ export const AdmissionsManagement: React.FC = () => {
         <Modal
           isOpen={showAdmitModal}
           onClose={() => setShowAdmitModal(false)}
-          title="Direct Inpatient Admission"
-          subtitle="Assign patient to an available ward bed with auto-status update"
+          title="New Inpatient Admission"
+          subtitle="Assign an admitted patient to an available ward bed."
           maxWidth="lg"
         >
-          <form onSubmit={handleAdmitSubmit} className="space-y-4 text-xs">
+          <form onSubmit={handleAdmitSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
+                {error}
               </div>
             )}
 
-            {/* Select Patient */}
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Select Patient *
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Select Registered Patient
               </label>
               <select
                 required
                 value={patientId}
                 onChange={(e) => setPatientId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               >
                 {patients.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.user.name} ({p.medicalRecordNumber}) - Blood: {p.bloodGroup || 'N/A'}
+                  <option key={p.id} value={p.id} className="bg-slate-900 text-white">
+                    {p.user.name} (MRN: {p.medicalRecordNumber})
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Select Available Bed */}
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Select Available Bed Unit *
-              </label>
-              {availableBeds.length === 0 ? (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-semibold">
-                  ⚠️ No beds currently marked as AVAILABLE. Please create or clean a bed first.
-                </div>
-              ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Available Ward Bed
+                </label>
                 <select
                   required
                   value={bedId}
                   onChange={(e) => setBedId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold font-mono text-purple-800"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 >
-                  {availableBeds.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.bedNumber} ({b.ward.name} - {b.ward.type}) • ${b.dailyRate}/day
+                  {availableBeds.length === 0 ? (
+                    <option value="" disabled className="bg-slate-900 text-white">No available beds</option>
+                  ) : (
+                    availableBeds.map((b) => (
+                      <option key={b.id} value={b.id} className="bg-slate-900 text-white">
+                        {b.ward?.name} - Bed #{b.bedNumber} (${b.dailyRate}/day)
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Attending Physician
+                </label>
+                <select
+                  required
+                  value={admittingDoctorId}
+                  onChange={(e) => setAdmittingDoctorId(e.target.value)}
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
+                >
+                  {doctors.map((d) => (
+                    <option key={d.id} value={d.id} className="bg-slate-900 text-white">
+                      Dr. {d.user.name} ({d.specialization})
                     </option>
                   ))}
                 </select>
-              )}
+              </div>
             </div>
 
-            {/* Select Doctor */}
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Attending Admitting Physician *
-              </label>
-              <select
-                required
-                value={admittingDoctorId}
-                onChange={(e) => setAdmittingDoctorId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"
-              >
-                {doctors.map((doc) => (
-                  <option key={doc.id} value={doc.id}>
-                    Dr. {doc.user.name} ({doc.specialization})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Reason */}
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Reason for Admission *
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Admission Reason / Primary Complaint *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Acute chest pain, Post-operative joint recovery, Acute appendicitis"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="e.g. Post-operative recovery, severe dehydration, respiratory distress..."
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               />
             </div>
 
-            {/* Initial Diagnosis */}
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Initial Clinical Diagnosis (Optional)
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Preliminary Diagnosis (Optional)
               </label>
               <textarea
                 rows={2}
-                placeholder="Clinical observations, vital parameters, triage notes..."
                 value={diagnosis}
                 onChange={(e) => setDiagnosis(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                placeholder="Initial clinical observations..."
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               />
             </div>
 
@@ -478,16 +450,16 @@ export const AdmissionsManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowAdmitModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting || availableBeds.length === 0}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md shadow-purple-500/20 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md disabled:opacity-50"
               >
-                {submitting ? 'Admitting...' : 'Confirm Patient Admission'}
+                {submitting ? 'Admitting...' : 'Confirm Admission'}
               </button>
             </div>
           </form>
@@ -499,69 +471,73 @@ export const AdmissionsManagement: React.FC = () => {
         <Modal
           isOpen={!!dischargeTarget}
           onClose={() => setDischargeTarget(null)}
-          title={`Discharge Patient: ${dischargeTarget.patient?.user?.name}`}
-          subtitle={`Admission #${dischargeTarget.admissionNumber} • Bed ${dischargeTarget.bed?.bedNumber}`}
+          title={`Discharge Patient: ${dischargeTarget.patient.user.name}`}
+          subtitle={`Admission #${dischargeTarget.admissionNumber} • Ward ${dischargeTarget.bed?.ward?.name} Bed #${dischargeTarget.bed?.bedNumber}`}
           maxWidth="md"
         >
-          <form onSubmit={handleDischargeSubmit} className="space-y-4 text-xs">
+          <form onSubmit={handleDischargeSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-              <div>
-                <p className="text-slate-500 text-[10px] font-bold uppercase">Estimated Bill</p>
-                <p className="text-base font-extrabold text-slate-900 mt-0.5">${calculatedBill}.00 USD</p>
-              </div>
-              <div>
-                <p className="text-slate-500 text-[10px] font-bold uppercase">Admitted</p>
-                <p className="font-bold text-slate-700 mt-0.5">{new Date(dischargeTarget.admissionDate).toLocaleDateString()}</p>
-              </div>
-            </div>
-
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Discharge Clinical Summary *
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Discharge Clinical Summary
               </label>
               <textarea
                 rows={3}
                 required
                 value={dischargeSummary}
                 onChange={(e) => setDischargeSummary(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white focus:border-blue-400"
               />
             </div>
 
-            <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Post-Discharge Bed Status Auto-Set
-              </label>
-              <select
-                value={postBedStatus}
-                onChange={(e) => setPostBedStatus(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs"
-              >
-                <option value="CLEANING">CLEANING (Recommended for sanitation)</option>
-                <option value="AVAILABLE">AVAILABLE (Immediate intake)</option>
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Bed Post-Status
+                </label>
+                <select
+                  value={postBedStatus}
+                  onChange={(e) => setPostBedStatus(e.target.value)}
+                  className="w-full p-2 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white"
+                >
+                  <option value="CLEANING" className="bg-slate-900 text-white">Cleaning / Sanitizing</option>
+                  <option value="AVAILABLE" className="bg-slate-900 text-white">Immediate Available</option>
+                  <option value="MAINTENANCE" className="bg-slate-900 text-white">Maintenance</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Total Bill (USD)
+                </label>
+                <input
+                  type="number"
+                  value={calculatedBill}
+                  onChange={(e) => setCalculatedBill(Number(e.target.value))}
+                  className="w-full p-2 bg-slate-950/60 border border-white/20 rounded-xl text-xs text-white font-mono font-bold"
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setDischargeTarget(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-md shadow-rose-500/20 disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Processing Discharge...' : 'Confirm Patient Discharge'}
+                {submitting ? 'Discharging...' : 'Confirm Discharge'}
               </button>
             </div>
           </form>
@@ -573,31 +549,31 @@ export const AdmissionsManagement: React.FC = () => {
         <Modal
           isOpen={!!transferTarget}
           onClose={() => setTransferTarget(null)}
-          title={`Transfer Bed for ${transferTarget.patient?.user?.name}`}
-          subtitle={`Current: ${transferTarget.bed?.ward?.name} Bed ${transferTarget.bed?.bedNumber}`}
+          title={`Transfer Bed: ${transferTarget.patient.user.name}`}
+          subtitle={`Currently in ${transferTarget.bed?.ward?.name} Bed #${transferTarget.bed?.bedNumber}`}
           maxWidth="md"
         >
-          <form onSubmit={handleTransferSubmit} className="space-y-4 text-xs">
+          <form onSubmit={handleTransferSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Select Destination Available Bed *
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                Select Destination Bed
               </label>
               <select
                 required
                 value={transferBedId}
                 onChange={(e) => setTransferBedId(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold font-mono text-xs"
+                className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
               >
-                <option value="">-- Choose Target Bed --</option>
+                <option value="" className="bg-slate-900 text-white">-- Select Available Bed --</option>
                 {availableBeds.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.bedNumber} ({b.ward.name} - {b.ward.type}) • ${b.dailyRate}/day
+                  <option key={b.id} value={b.id} className="bg-slate-900 text-white">
+                    {b.ward?.name} - Bed #{b.bedNumber} ({(b as any).type || (b as any).category || 'Standard'})
                   </option>
                 ))}
               </select>
@@ -607,16 +583,16 @@ export const AdmissionsManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setTransferTarget(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting || !transferBedId}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
-                {submitting ? 'Transferring...' : 'Execute Bed Transfer'}
+                {submitting ? 'Transferring...' : 'Confirm Transfer'}
               </button>
             </div>
           </form>
@@ -625,3 +601,5 @@ export const AdmissionsManagement: React.FC = () => {
     </div>
   );
 };
+
+export default AdmissionsManagement;

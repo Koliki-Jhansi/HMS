@@ -93,39 +93,41 @@ export const DoctorAppointments: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white select-none">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
           Appointment Consultation Queue
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Review consultation requests, manage appointment lifecycles, and launch live consultation notes.
+        <p className="text-xs sm:text-sm text-slate-300 mt-1">
+          Review, accept, launch digital consultations, and document clinical outcomes.
         </p>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      {/* Controls Bar */}
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
+        {/* Search */}
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search patient, MRN, appointment #..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
+            placeholder="Search by patient name, token, reason..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder:text-slate-500"
           />
         </div>
 
+        {/* Status Filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
           {['ALL', 'PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'REJECTED'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 statusFilter === st
-                  ? 'bg-brand-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
               {st.replace('_', ' ')}
@@ -134,138 +136,122 @@ export const DoctorAppointments: React.FC = () => {
         </div>
       </div>
 
-      {/* Appointment Queue List */}
+      {/* Appointment Cards */}
       {loading ? (
-        <LoadingSpinner text="Fetching doctor appointments..." />
+        <LoadingSpinner text="Retrieving patient appointment slots..." />
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No appointments in queue"
-          description="There are no appointments matching the selected status filter."
+          title="No appointments matching your criteria"
+          description="When patients book consultations in your clinical wing, they will appear here in real time."
         />
       ) : (
         <div className="space-y-4">
           {filtered.map((apt) => (
             <div
               key={apt.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card hover:shadow-card-hover transition-all"
+              className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-5 shadow-xl hover:border-cyan-400/40 transition-all space-y-4 text-white"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              {/* Top Meta Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
                 <div className="flex items-center gap-3.5">
                   <img
                     src={
                       apt.patient.user.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(
                         apt.patient.user.name
-                      )}&background=0f766e&color=fff&bold=true`
+                      )}&background=0284c7&color=fff&bold=true`
                     }
                     alt={apt.patient.user.name}
-                    className="w-12 h-12 rounded-xl object-cover ring-2 ring-teal-500/20"
+                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-cyan-500/30"
                   />
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-slate-900">{apt.patient.user.name}</h3>
-                      <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-semibold">
+                      <h3 className="text-base font-bold text-white">{apt.patient.user.name}</h3>
+                      <span className="text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 px-2.5 py-0.5 rounded-md">
                         {apt.appointmentNumber}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500">
-                      MRN: <span className="font-mono font-bold text-slate-700">{apt.patient.medicalRecordNumber}</span> • Gender: {apt.patient.gender || 'N/A'} • Blood: {apt.patient.bloodGroup || 'N/A'}
+                    <p className="text-xs text-slate-300">
+                      MRN: {apt.patient.medicalRecordNumber} • Blood Group: {apt.patient.bloodGroup || 'Not set'} • Gender: {apt.patient.gender}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2">
                   <Badge status={apt.status} size="md" />
-                  <div className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                  <div className="text-xs font-mono text-cyan-300 flex items-center gap-2 font-bold">
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" /> {apt.appointmentDate}
+                      <Calendar className="w-3.5 h-3.5" /> {apt.appointmentDate}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" /> {apt.timeSlot}
+                      <Clock className="w-3.5 h-3.5" /> {apt.timeSlot}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Consultation details */}
-              <div className="mt-3.5 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50/70 p-3.5 rounded-xl border border-slate-100">
+              {/* Consultation Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-950/40 p-3.5 rounded-2xl border border-white/10">
                 <div>
-                  <span className="font-bold text-slate-500 uppercase tracking-wider block">
-                    Chief Complaint / Reason
-                  </span>
-                  <p className="text-slate-800 font-medium mt-0.5">{apt.reason}</p>
+                  <span className="font-bold text-cyan-300 block">Reason for Consultation:</span>
+                  <p className="text-slate-200 mt-0.5">{apt.reason}</p>
                 </div>
-                <div>
-                  <span className="font-bold text-slate-500 uppercase tracking-wider block">
-                    Reported Symptoms & Notes
-                  </span>
-                  <p className="text-slate-800 font-medium mt-0.5">{apt.symptoms || 'None specified'}</p>
-                </div>
+                {apt.symptoms && (
+                  <div>
+                    <span className="font-bold text-cyan-300 block">Reported Symptoms:</span>
+                    <p className="text-slate-200 mt-0.5">{apt.symptoms}</p>
+                  </div>
+                )}
                 {apt.rejectionReason && (
-                  <div className="md:col-span-2 text-rose-700 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                  <div className="sm:col-span-2 text-rose-300 bg-rose-950/40 p-2.5 rounded-xl border border-rose-500/30">
                     <strong>Rejection Reason:</strong> {apt.rejectionReason}
                   </div>
                 )}
-                {apt.cancellationReason && (
-                  <div className="md:col-span-2 text-slate-600 bg-slate-100 p-2.5 rounded-lg">
-                    <strong>Patient Cancellation:</strong> {apt.cancellationReason}
-                  </div>
-                )}
               </div>
 
-              {/* Action Controls */}
-              <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <span className="text-slate-400 text-[11px]">
-                  Phone: {apt.patient.user.phone || 'N/A'} | Email: {apt.patient.user.email}
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
+                <span className="text-[11px] text-slate-400">
+                  Phone: {apt.patient?.user?.phone || 'N/A'} • Emergency Contact: {apt.patient?.emergencyContactName || (apt.patient as any)?.emergencyContact || 'N/A'}
                 </span>
 
                 <div className="flex items-center gap-2">
                   {apt.status === 'PENDING' && (
                     <>
                       <button
-                        onClick={() => setRejectApt(apt)}
-                        className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 font-bold flex items-center gap-1 transition-colors"
+                        onClick={() => handleUpdateStatus(apt.id, 'ACCEPTED')}
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md"
                       >
-                        <XCircle className="w-3.5 h-3.5" />
-                        Reject Request
+                        <CheckCircle2 className="w-4 h-4" />
+                        Accept Slot
                       </button>
                       <button
-                        onClick={() => handleUpdateStatus(apt.id, 'ACCEPTED')}
-                        className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                        onClick={() => setRejectApt(apt)}
+                        className="px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold text-xs border border-rose-400/30 flex items-center gap-1.5"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Accept Appointment
+                        <XCircle className="w-4 h-4" />
+                        Reject
                       </button>
                     </>
                   )}
 
-                  {apt.status === 'ACCEPTED' && (
+                  {(apt.status === 'ACCEPTED' || apt.status === 'IN_PROGRESS') && (
                     <button
-                      onClick={() => navigate(`/doctor/consultation?aptId=${apt.id}`)}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-brand-600 hover:from-purple-700 hover:to-brand-700 text-white font-bold flex items-center gap-1.5 shadow-md shadow-purple-500/20 transition-all"
+                      onClick={() => navigate(`/doctor/consultation/${apt.id}`)}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-sky-500/20 hover:scale-105 transition-all"
                     >
                       <PlayCircle className="w-4 h-4" />
-                      Start Consultation Room
-                    </button>
-                  )}
-
-                  {apt.status === 'IN_PROGRESS' && (
-                    <button
-                      onClick={() => navigate(`/doctor/consultation?aptId=${apt.id}`)}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all animate-pulse"
-                    >
-                      <Stethoscope className="w-4 h-4" />
-                      Resume & Prescribe Rx
+                      Launch Consultation Room
                     </button>
                   )}
 
                   {apt.status === 'COMPLETED' && (
                     <button
-                      onClick={() => navigate(`/doctor/consultation?aptId=${apt.id}`)}
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center gap-1.5 transition-colors"
+                      onClick={() => navigate(`/doctor/consultation/${apt.id}`)}
+                      className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 flex items-center gap-1.5"
                     >
-                      <FileText className="w-3.5 h-3.5" />
-                      View Consultation Summary
+                      <FileText className="w-4 h-4 text-cyan-300" />
+                      View Completed EHR & Rx
                     </button>
                   )}
                 </div>
@@ -275,27 +261,23 @@ export const DoctorAppointments: React.FC = () => {
         </div>
       )}
 
-      {/* Reject Modal */}
+      {/* Rejection Modal */}
       {rejectApt && (
         <Modal
           isOpen={!!rejectApt}
           onClose={() => setRejectApt(null)}
           title="Decline Appointment Request"
-          subtitle={`Patient: ${rejectApt.patient.user.name} • ${rejectApt.appointmentDate}`}
+          subtitle={`Rejecting slot for ${rejectApt.patient.user.name} on ${rejectApt.appointmentDate}`}
           maxWidth="md"
         >
-          <form onSubmit={handleRejectSubmit} className="space-y-4 text-xs">
+          <form onSubmit={handleRejectSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300">
                 {error}
               </div>
             )}
-            <p className="text-slate-600">
-              Provide a brief explanation for declining this appointment request. The patient will be notified automatically.
-            </p>
-
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                 Reason for Rejection
               </label>
               <textarea
@@ -303,8 +285,8 @@ export const DoctorAppointments: React.FC = () => {
                 required
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="e.g. Schedule emergency conflict, please select an afternoon slot tomorrow..."
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:bg-white text-xs"
+                placeholder="e.g. Schedule conflict, emergency surgery, refer to another specialist..."
+                className="w-full p-3 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
               />
             </div>
 
@@ -312,16 +294,16 @@ export const DoctorAppointments: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setRejectApt(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={rejecting}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-xs disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md disabled:opacity-70"
               >
-                {rejecting ? 'Declining...' : 'Decline Request'}
+                {rejecting ? 'Processing...' : 'Confirm Rejection'}
               </button>
             </div>
           </form>
@@ -330,3 +312,5 @@ export const DoctorAppointments: React.FC = () => {
     </div>
   );
 };
+
+export default DoctorAppointments;

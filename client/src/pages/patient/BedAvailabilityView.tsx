@@ -58,28 +58,28 @@ export const BedAvailabilityView: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white select-none">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
           Hospital Ward & Bed Availability
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+        <p className="text-xs sm:text-sm text-slate-300 mt-1">
           Real-time bed occupancy tracker across Intensive Care, Emergency, General, and Private suites.
         </p>
       </div>
 
       {/* Active Admission Banner if Patient is Admitted */}
       {activeAdmission && (
-        <div className="bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 rounded-3xl p-6 text-white shadow-xl">
+        <div className="bg-purple-950/60 backdrop-blur-xl rounded-3xl border border-purple-500/40 p-6 text-white shadow-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-white/10 border border-white/20 text-white backdrop-blur-md">
+              <div className="p-3.5 rounded-2xl bg-purple-600/30 border border-purple-400/40 text-purple-300 shadow-md">
                 <BedDouble className="w-8 h-8" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-400/30 px-2.5 py-0.5 rounded-full">
                     Your Active Inpatient Admission
                   </span>
                   <Badge status="ACTIVE" size="sm" />
@@ -93,130 +93,106 @@ export const BedAvailabilityView: React.FC = () => {
               </div>
             </div>
 
-            <div className="text-left md:text-right bg-white/10 p-3 rounded-xl border border-white/10 text-xs">
-              <p className="text-purple-200">Admitted on</p>
+            <div className="text-left md:text-right bg-slate-950/40 p-3.5 rounded-2xl border border-white/10 text-xs">
+              <p className="text-purple-300">Admitted on</p>
               <p className="font-bold text-white text-sm">
                 {new Date(activeAdmission.admissionDate).toLocaleString()}
-              </p>
-              <p className="text-purple-200 mt-1">
-                Diagnosis: <span className="text-white font-semibold">{activeAdmission.diagnosis || activeAdmission.reason}</span>
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Global Bed Metrics Bar */}
-      {bedStats && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-card text-center">
-            <span className="text-[10px] font-bold text-slate-400 uppercase">Total Beds</span>
-            <p className="text-xl font-extrabold text-slate-900 mt-0.5">{bedStats.total}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-card text-center">
-            <span className="text-[10px] font-bold text-emerald-700 uppercase">Available</span>
-            <p className="text-xl font-extrabold text-emerald-700 mt-0.5">{bedStats.available}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 shadow-card text-center">
-            <span className="text-[10px] font-bold text-rose-700 uppercase">Occupied</span>
-            <p className="text-xl font-extrabold text-rose-700 mt-0.5">{bedStats.occupied}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-card text-center">
-            <span className="text-[10px] font-bold text-amber-700 uppercase">Reserved</span>
-            <p className="text-xl font-extrabold text-amber-700 mt-0.5">{bedStats.reserved}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-cyan-50 border border-cyan-200 shadow-card text-center">
-            <span className="text-[10px] font-bold text-cyan-700 uppercase">Cleaning</span>
-            <p className="text-xl font-extrabold text-cyan-700 mt-0.5">{bedStats.cleaning}</p>
-          </div>
-          <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300 shadow-card text-center">
-            <span className="text-[10px] font-bold text-slate-600 uppercase">Occupancy Rate</span>
-            <p className="text-xl font-extrabold text-slate-800 mt-0.5">{bedStats.occupancyRate}%</p>
-          </div>
+      {/* Overview Stat Counters */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-slate-900/45 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-lg">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Beds</span>
+          <span className="text-2xl font-extrabold text-white">{bedStats?.total || beds.length}</span>
+          <span className="text-[11px] text-teal-300 block font-medium">Hospital Capacity</span>
         </div>
-      )}
+        <div className="bg-slate-900/45 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-lg">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Available Beds</span>
+          <span className="text-2xl font-extrabold text-emerald-400">{bedStats?.available || 0}</span>
+          <span className="text-[11px] text-emerald-300 block font-medium">Ready for Intake</span>
+        </div>
+        <div className="bg-slate-900/45 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-lg">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Occupied Beds</span>
+          <span className="text-2xl font-extrabold text-amber-400">{bedStats?.occupied || 0}</span>
+          <span className="text-[11px] text-amber-300 block font-medium">Currently in Use</span>
+        </div>
+        <div className="bg-slate-900/45 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-lg">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Occupancy Rate</span>
+          <span className="text-2xl font-extrabold text-sky-400">{bedStats?.occupancyRate || 0}%</span>
+          <span className="text-[11px] text-sky-300 block font-medium">Global Capacity</span>
+        </div>
+      </div>
 
-      {/* Ward Filter Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+      {/* Ward Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
         <button
           onClick={() => setSelectedWard('ALL')}
           className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
             selectedWard === 'ALL'
-              ? 'bg-brand-600 text-white shadow-xs'
-              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              ? 'bg-teal-500/30 text-teal-300 border border-teal-400/50 shadow-md backdrop-blur-md'
+              : 'bg-slate-900/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 backdrop-blur-md'
           }`}
         >
-          All Wards ({beds.length} Beds)
+          All Wards ({beds.length})
         </button>
-        {wards.map((w) => (
-          <button
-            key={w.id}
-            onClick={() => setSelectedWard(w.id)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-              selectedWard === w.id
-                ? 'bg-brand-600 text-white shadow-xs'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {w.name} ({w.beds?.length || 0})
-          </button>
-        ))}
+        {wards.map((ward) => {
+          const wardBeds = beds.filter((b) => b.wardId === ward.id);
+          return (
+            <button
+              key={ward.id}
+              onClick={() => setSelectedWard(ward.id)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                selectedWard === ward.id
+                  ? 'bg-teal-500/30 text-teal-300 border border-teal-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-900/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 backdrop-blur-md'
+              }`}
+            >
+              {ward.name} ({wardBeds.length})
+            </button>
+          );
+        })}
       </div>
 
-      {/* Interactive Visual Bed Matrix */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Beds Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
         {filteredBeds.map((bed) => {
-          const isAvailable = bed.status === 'AVAILABLE';
+          const isAvail = bed.status === 'AVAILABLE';
+          const isOcc = bed.status === 'OCCUPIED';
+          const isMaint = bed.status === 'MAINTENANCE';
 
           return (
             <div
               key={bed.id}
-              className={`rounded-2xl p-4 border transition-all duration-200 bg-white ${
-                isAvailable
-                  ? 'border-emerald-200 hover:border-emerald-400 shadow-card hover:shadow-card-hover'
-                  : 'border-slate-200 shadow-card'
+              className={`p-3.5 rounded-2xl border backdrop-blur-xl transition-all shadow-md flex flex-col justify-between ${
+                isAvail
+                  ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-100'
+                  : isOcc
+                  ? 'bg-rose-950/30 border-rose-500/30 text-rose-100'
+                  : 'bg-slate-950/30 border-slate-700/40 text-slate-300'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`p-2 rounded-xl ${
-                      isAvailable
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : bed.status === 'OCCUPIED'
-                        ? 'bg-rose-50 text-rose-600'
-                        : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    <BedDouble className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-slate-900 font-mono">
-                      {bed.bedNumber}
-                    </h3>
-                    <span className="text-[10px] text-slate-400 block truncate max-w-[120px]">
-                      {bed.ward.name}
-                    </span>
-                  </div>
-                </div>
-
-                <Badge status={bed.status} size="sm" />
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-mono font-bold uppercase">{bed.ward?.name || 'Ward'}</span>
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isAvail ? 'bg-emerald-400 animate-pulse' : isOcc ? 'bg-rose-400' : 'bg-slate-400'
+                  }`}
+                />
               </div>
 
-              <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                <div className="flex items-center justify-between text-slate-500">
-                  <span>Ward Type:</span>
-                  <span className="font-semibold text-slate-700">{bed.ward.type}</span>
-                </div>
-                <div className="flex items-center justify-between text-slate-500">
-                  <span>Daily Rate:</span>
-                  <span className="font-bold text-slate-900">${bed.dailyRate}/day</span>
-                </div>
-                {bed.notes && (
-                  <p className="text-[11px] text-slate-400 italic pt-1 truncate">
-                    Note: {bed.notes}
-                  </p>
-                )}
+              <div className="my-1">
+                <BedDouble className="w-5 h-5 mb-1 opacity-80" />
+                <span className="text-base font-extrabold font-mono block">Bed {bed.bedNumber}</span>
+                <span className="text-[10px] opacity-75">{(bed as any).type || (bed as any).category || 'Standard'}</span>
+              </div>
+
+              <div className="pt-2 mt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-bold">
+                <span>{bed.status}</span>
+                <span className="font-mono">${bed.dailyRate}/day</span>
               </div>
             </div>
           );
@@ -225,3 +201,5 @@ export const BedAvailabilityView: React.FC = () => {
     </div>
   );
 };
+
+export default BedAvailabilityView;

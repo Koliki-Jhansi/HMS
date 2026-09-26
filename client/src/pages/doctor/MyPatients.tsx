@@ -52,19 +52,19 @@ export const MyPatients: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white select-none">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
           Assigned Patients Directory
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Review patient medical histories, contact details, and past prescriptions under your clinical supervision.
+        <p className="text-xs sm:text-sm text-slate-300 mt-1">
+          Review patient electronic health records, contact details, and clinical histories.
         </p>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex items-center justify-between">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex items-center justify-between text-white">
         <div className="w-full md:w-96 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
@@ -72,11 +72,11 @@ export const MyPatients: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by patient name, MRN, phone..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white"
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder:text-slate-500"
           />
         </div>
-        <span className="text-xs font-bold text-slate-500 hidden sm:block">
-          Total Patients: {filtered.length}
+        <span className="text-xs font-bold text-cyan-300 hidden sm:block">
+          Total Assigned: {filtered.length} Patients
         </span>
       </div>
 
@@ -93,7 +93,7 @@ export const MyPatients: React.FC = () => {
           {filtered.map((patient) => (
             <div
               key={patient.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between"
+              className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-5 shadow-xl hover:border-cyan-400/40 transition-all flex flex-col justify-between text-white"
             >
               <div>
                 <div className="flex items-start gap-3.5">
@@ -102,48 +102,41 @@ export const MyPatients: React.FC = () => {
                       patient.user.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(
                         patient.user.name
-                      )}&background=0f766e&color=fff&bold=true`
+                      )}&background=0284c7&color=fff&bold=true`
                     }
                     alt={patient.user.name}
-                    className="w-12 h-12 rounded-xl object-cover ring-2 ring-teal-500/20 shrink-0"
+                    className="w-14 h-14 rounded-2xl object-cover ring-2 ring-cyan-500/30 shrink-0"
                   />
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">{patient.user.name}</h3>
-                    <p className="text-[11px] font-mono text-brand-700 font-semibold">
+                    <span className="text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 px-2 py-0.5 rounded-md">
                       {patient.medicalRecordNumber}
+                    </span>
+                    <h3 className="text-base font-bold text-white mt-1">{patient.user.name}</h3>
+                    <p className="text-xs text-slate-300">
+                      Blood Group: <strong className="text-cyan-300">{patient.bloodGroup || 'Not recorded'}</strong>
                     </p>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-                      <span>Blood: <strong className="text-slate-700">{patient.bloodGroup || 'N/A'}</strong></span>
-                      <span>•</span>
-                      <span>Gender: <strong className="text-slate-700">{patient.gender || 'N/A'}</strong></span>
-                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-600">
+                <div className="mt-4 pt-3.5 border-t border-white/10 space-y-2 text-xs text-slate-300">
                   <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{patient.user.phone || 'No phone recorded'}</span>
+                    <Phone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>{patient.user.phone || 'Phone not provided'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                     <span className="truncate">{patient.user.email}</span>
                   </div>
-                  {patient.allergies && (
-                    <p className="text-[11px] text-rose-600 font-semibold pt-1">
-                      ⚠️ Allergies: {patient.allergies}
-                    </p>
-                  )}
                 </div>
               </div>
 
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div className="mt-5 pt-3.5 border-t border-white/10 flex items-center justify-between gap-2">
                 <button
                   onClick={() => setSelectedPatient(patient)}
-                  className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-xs rounded-xl border border-cyan-400/30 flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  View Full Profile
+                  View Patient File
                 </button>
               </div>
             </div>
@@ -151,81 +144,48 @@ export const MyPatients: React.FC = () => {
         </div>
       )}
 
-      {/* Patient Detail Modal */}
+      {/* Patient EHR Summary Modal */}
       {selectedPatient && (
         <Modal
           isOpen={!!selectedPatient}
           onClose={() => setSelectedPatient(null)}
-          title={`Patient Health Profile: ${selectedPatient.user.name}`}
-          subtitle={`MRN: ${selectedPatient.medicalRecordNumber}`}
+          title={`Electronic Health Record: ${selectedPatient.user.name}`}
+          subtitle={`MRN #${selectedPatient.medicalRecordNumber}`}
           maxWidth="2xl"
         >
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="space-y-4 text-white">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-950/40 p-3.5 rounded-2xl border border-white/10">
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Gender</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.gender || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Gender</span>
+                <span className="font-bold text-white">{selectedPatient.gender}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Date of Birth</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.dateOfBirth || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Blood Group</span>
+                <span className="font-bold text-cyan-300">{selectedPatient.bloodGroup || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Blood Group</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.bloodGroup || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Emergency Contact</span>
+                <span className="font-bold text-white">{selectedPatient.emergencyContactName || (selectedPatient as any).emergencyContact || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Contact</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.user.phone || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Total History Records</span>
+                <span className="font-bold text-white">{selectedPatient.medicalRecords?.length || 0}</span>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-              <p>
-                <strong>Residential Address:</strong> {selectedPatient.address || 'N/A'}
-              </p>
-              <p>
-                <strong>Emergency Contact:</strong> {selectedPatient.emergencyContactName || 'N/A'} ({selectedPatient.emergencyContactPhone || 'N/A'})
-              </p>
-              <p className="text-rose-700 font-semibold">
-                <strong>Documented Allergies:</strong> {selectedPatient.allergies || 'None'}
-              </p>
-              <p className="text-amber-700 font-semibold">
-                <strong>Chronic Conditions:</strong> {selectedPatient.chronicConditions || 'None'}
-              </p>
-            </div>
+            {selectedPatient.address && (
+              <div className="p-3 bg-slate-950/40 rounded-xl border border-white/10 text-xs">
+                <span className="font-bold text-slate-400 block text-[10px] uppercase">Registered Address</span>
+                <p className="text-slate-200 mt-0.5">{selectedPatient.address}</p>
+              </div>
+            )}
 
-            {/* Prescriptions under this doctor */}
-            <div>
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">
-                Recent Issued Prescriptions
-              </span>
-              {selectedPatient.prescriptions && selectedPatient.prescriptions.length > 0 ? (
-                <div className="space-y-2">
-                  {selectedPatient.prescriptions.map((p) => (
-                    <div key={p.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-slate-900">{p.diagnosis}</span>
-                        <span className="font-mono text-brand-600">{p.prescriptionNumber}</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        Issued on: {new Date(p.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-slate-400 italic">No past prescriptions on record.</p>
-              )}
-            </div>
-
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-2 border-t border-white/10">
               <button
-                type="button"
                 onClick={() => setSelectedPatient(null)}
-                className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl"
+                className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md"
               >
-                Close
+                Close Patient File
               </button>
             </div>
           </div>
@@ -234,3 +194,5 @@ export const MyPatients: React.FC = () => {
     </div>
   );
 };
+
+export default MyPatients;

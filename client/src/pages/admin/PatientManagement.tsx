@@ -18,6 +18,7 @@ import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
+import { HospitalHeader3D } from '../../components/3d/HospitalHeader3D';
 
 export const PatientManagement: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -57,19 +58,17 @@ export const PatientManagement: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-          Patient Directory & Electronic Medical Profiles
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Search and review registered patient master files, medical record numbers (MRN), and inpatient admissions.
-        </p>
-      </div>
+    <div className="space-y-6 text-white select-none">
+      {/* 3D Moving Hospital Ward Header */}
+      <HospitalHeader3D
+        type="ward"
+        badge="Electronic Health Records (EHR)"
+        title="Patient Directory & Profiles"
+        subtitle="Search and review registered patient master files, medical record numbers (MRN), and inpatient admissions."
+      />
 
       {/* Search & Filter Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         <div className="w-full md:w-96 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
@@ -77,7 +76,7 @@ export const PatientManagement: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, MRN, email, phone..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:bg-white"
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder:text-slate-500"
           />
         </div>
 
@@ -88,8 +87,8 @@ export const PatientManagement: React.FC = () => {
               onClick={() => setBloodFilter(bg)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                 bloodFilter === bg
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
               {bg}
@@ -100,150 +99,121 @@ export const PatientManagement: React.FC = () => {
 
       {/* Patient Table */}
       {loading ? (
-        <LoadingSpinner text="Loading patient database..." />
+        <LoadingSpinner text="Retrieving patient records..." />
       ) : filtered.length === 0 ? (
         <EmptyState
           title="No patients found"
-          description="There are no patients registered matching your search."
+          description="No patients match your search query."
         />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200">
+            <table className="w-full text-left text-xs text-white">
+              <thead className="bg-slate-950/70 border-b border-white/10 text-blue-300 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="p-4">Patient Name</th>
-                  <th className="p-4">MRN #</th>
-                  <th className="p-4">Gender & DOB</th>
-                  <th className="p-4">Blood Group</th>
-                  <th className="p-4">Contact Phone</th>
-                  <th className="p-4">Inpatient Status</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">Patient Profile</th>
+                  <th className="py-3.5 px-4">Medical Record #</th>
+                  <th className="py-3.5 px-4">Contact Info</th>
+                  <th className="py-3.5 px-4">Blood Group</th>
+                  <th className="py-3.5 px-4">Registered Date</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {filtered.map((patient) => {
-                  const activeAdm =
-                    patient.admissions && patient.admissions.length > 0 ? patient.admissions[0] : null;
-
-                  return (
-                    <tr key={patient.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={
-                              patient.user.avatar ||
-                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                patient.user.name
-                              )}&background=0f766e&color=fff&bold=true`
-                            }
-                            alt={patient.user.name}
-                            className="w-10 h-10 rounded-xl object-cover ring-2 ring-teal-500/20"
-                          />
-                          <div>
-                            <p className="font-bold text-slate-900 text-sm">{patient.user.name}</p>
-                            <p className="text-[11px] text-slate-400">{patient.user.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4 font-mono font-bold text-brand-700">
+              <tbody className="divide-y divide-white/5 bg-slate-950/20">
+                {filtered.map((patient) => (
+                  <tr key={patient.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3.5 px-4 flex items-center gap-3">
+                      <img
+                        src={
+                          patient.user.avatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            patient.user.name
+                          )}&background=0284c7&color=fff&bold=true`
+                        }
+                        alt={patient.user.name}
+                        className="w-10 h-10 rounded-xl object-cover ring-1 ring-blue-500/30"
+                      />
+                      <div>
+                        <strong className="text-white block">{patient.user.name}</strong>
+                        <span className="text-[11px] text-slate-400 capitalize">{patient.gender ? patient.gender.toLowerCase() : 'Unspecified'}</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono text-xs font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-md border border-blue-400/30">
                         {patient.medicalRecordNumber}
-                      </td>
-                      <td className="p-4">
-                        <p className="font-bold text-slate-800">{patient.gender || 'N/A'}</p>
-                        <p className="text-[11px] text-slate-400">{patient.dateOfBirth || 'N/A'}</p>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-bold border border-rose-200">
-                          {patient.bloodGroup || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-slate-600">
-                        {patient.user.phone || 'No phone'}
-                      </td>
-                      <td className="p-4">
-                        {activeAdm ? (
-                          <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 font-bold border border-purple-200">
-                            Admitted ({activeAdm.bed.ward.name} Bed {activeAdm.bed.bedNumber})
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-semibold">
-                            Outpatient
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-4 text-right">
-                        <button
-                          onClick={() => setSelectedPatient(patient)}
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1 ml-auto transition-colors"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          Details
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <p className="text-slate-300">{patient.user.email}</p>
+                      <p className="text-slate-400 text-[11px]">{patient.user.phone || 'Phone N/A'}</p>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold text-xs border border-rose-400/30">
+                        {patient.bloodGroup || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-300">
+                      {new Date(patient.user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        onClick={() => setSelectedPatient(patient)}
+                        className="px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 font-bold text-xs border border-blue-400/30 flex items-center gap-1 ml-auto transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View Master EHR
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* Patient Detail Modal */}
+      {/* Patient Master EHR Modal */}
       {selectedPatient && (
         <Modal
           isOpen={!!selectedPatient}
           onClose={() => setSelectedPatient(null)}
-          title={`Patient Health Profile: ${selectedPatient.user.name}`}
-          subtitle={`MRN: ${selectedPatient.medicalRecordNumber}`}
-          maxWidth="lg"
+          title={`Master Patient File: ${selectedPatient.user.name}`}
+          subtitle={`MRN #${selectedPatient.medicalRecordNumber}`}
+          maxWidth="2xl"
         >
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div className="space-y-4 text-white">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-950/40 p-3.5 rounded-2xl border border-white/10">
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Gender</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.gender || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Gender</span>
+                <span className="font-bold text-white">{selectedPatient.gender || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Date of Birth</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.dateOfBirth || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Blood Group</span>
+                <span className="font-bold text-rose-300">{selectedPatient.bloodGroup || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Blood Group</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.bloodGroup || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Emergency Contact</span>
+                <span className="font-bold text-white">{selectedPatient.emergencyContactName || (selectedPatient as any).emergencyContact || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400">Phone</span>
-                <p className="font-bold text-slate-800 mt-0.5">{selectedPatient.user.phone || 'N/A'}</p>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Consultations</span>
+                <span className="font-bold text-white">{selectedPatient.appointments?.length || 0}</span>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-              <p>
-                <strong>Residential Address:</strong> {selectedPatient.address || 'N/A'}
-              </p>
-              <p>
-                <strong>Emergency Contact:</strong> {selectedPatient.emergencyContactName || 'N/A'} ({selectedPatient.emergencyContactPhone || 'N/A'})
-              </p>
-              <p className="text-rose-700 font-semibold">
-                <strong>Known Allergies:</strong> {selectedPatient.allergies || 'None declared'}
-              </p>
-              <p className="text-amber-700 font-semibold">
-                <strong>Chronic Conditions:</strong> {selectedPatient.chronicConditions || 'None'}
-              </p>
-              <p>
-                <strong>Insurance Provider:</strong> {selectedPatient.insuranceProvider || 'Self-pay'} ({selectedPatient.insurancePolicyNumber || 'N/A'})
-              </p>
-            </div>
+            {selectedPatient.address && (
+              <div className="p-3 bg-slate-950/40 rounded-xl border border-white/10 text-xs">
+                <span className="font-bold text-slate-400 block text-[10px] uppercase">Registered Address</span>
+                <p className="text-slate-200 mt-0.5">{selectedPatient.address}</p>
+              </div>
+            )}
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-2 border-t border-white/10">
               <button
-                type="button"
                 onClick={() => setSelectedPatient(null)}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
               >
-                Close
+                Close Patient File
               </button>
             </div>
           </div>
@@ -252,3 +222,5 @@ export const PatientManagement: React.FC = () => {
     </div>
   );
 };
+
+export default PatientManagement;

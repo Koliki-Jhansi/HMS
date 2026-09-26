@@ -23,34 +23,40 @@ export const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const colorMap = {
     brand: {
-      bg: 'bg-brand-50 text-brand-600',
-      border: 'border-brand-100',
-      gradient: 'from-brand-500/10 to-transparent',
+      bg: 'bg-sky-500/20 text-sky-400 border border-sky-400/30',
+      border: 'border-sky-500/30',
+      gradient: 'from-sky-500/15 to-transparent',
+      textAccent: 'text-sky-300',
     },
     teal: {
-      bg: 'bg-teal-50 text-teal-600',
-      border: 'border-teal-100',
-      gradient: 'from-teal-500/10 to-transparent',
+      bg: 'bg-teal-500/20 text-teal-400 border border-teal-400/30',
+      border: 'border-teal-500/30',
+      gradient: 'from-teal-500/15 to-transparent',
+      textAccent: 'text-teal-300',
     },
     emerald: {
-      bg: 'bg-emerald-50 text-emerald-600',
-      border: 'border-emerald-100',
-      gradient: 'from-emerald-500/10 to-transparent',
+      bg: 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/30',
+      border: 'border-emerald-500/30',
+      gradient: 'from-emerald-500/15 to-transparent',
+      textAccent: 'text-emerald-300',
     },
     amber: {
-      bg: 'bg-amber-50 text-amber-600',
-      border: 'border-amber-100',
-      gradient: 'from-amber-500/10 to-transparent',
+      bg: 'bg-amber-500/20 text-amber-400 border border-amber-400/30',
+      border: 'border-amber-500/30',
+      gradient: 'from-amber-500/15 to-transparent',
+      textAccent: 'text-amber-300',
     },
     rose: {
-      bg: 'bg-rose-50 text-rose-600',
-      border: 'border-rose-100',
-      gradient: 'from-rose-500/10 to-transparent',
+      bg: 'bg-rose-500/20 text-rose-400 border border-rose-400/30',
+      border: 'border-rose-500/30',
+      gradient: 'from-rose-500/15 to-transparent',
+      textAccent: 'text-rose-300',
     },
     purple: {
-      bg: 'bg-purple-50 text-purple-600',
-      border: 'border-purple-100',
-      gradient: 'from-purple-500/10 to-transparent',
+      bg: 'bg-purple-500/20 text-purple-400 border border-purple-400/30',
+      border: 'border-purple-500/30',
+      gradient: 'from-purple-500/15 to-transparent',
+      textAccent: 'text-purple-300',
     },
   };
 
@@ -58,11 +64,11 @@ export const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border bg-white p-5 shadow-card transition-all duration-200 hover:shadow-card-hover ${scheme.border}`}
+      className={`relative overflow-hidden rounded-2xl border bg-slate-900/45 backdrop-blur-xl p-5 shadow-lg transition-all duration-200 hover:border-white/30 text-white ${scheme.border}`}
     >
       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${scheme.gradient} rounded-bl-full pointer-events-none`} />
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
           {title}
         </span>
         <div className={`p-2.5 rounded-xl ${scheme.bg}`}>
@@ -71,11 +77,11 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
 
       <div className="mt-3">
-        <div className="text-2xl font-bold tracking-tight text-slate-900">{value}</div>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">{value}</div>
+        {subtitle && <p className="mt-1 text-xs text-slate-300 font-medium">{subtitle}</p>}
         {trend && (
           <div className="mt-2 flex items-center gap-1.5 text-xs font-medium">
-            <span className={trend.isPositive ? 'text-emerald-600' : 'text-rose-600'}>
+            <span className={trend.isPositive ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
               {trend.isPositive ? '↑' : '↓'} {trend.value}
             </span>
             <span className="text-slate-400">vs last month</span>
@@ -85,3 +91,5 @@ export const StatCard: React.FC<StatCardProps> = ({
     </div>
   );
 };
+
+export default StatCard;

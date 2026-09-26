@@ -20,6 +20,7 @@ import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
+import { HospitalHeader3D } from '../../components/3d/HospitalHeader3D';
 
 export const DoctorManagement: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -98,56 +99,54 @@ export const DoctorManagement: React.FC = () => {
         fetchDoctorsAndDepartments();
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to add doctor');
+      setError(err.response?.data?.message || 'Failed to register physician');
     } finally {
       setSubmitting(false);
     }
   };
 
   const filteredDoctors = doctors.filter((doc) => {
-    const matchDept = selectedDept === 'ALL' || doc.departmentId === selectedDept;
-    const matchSearch =
-      doc.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.specialization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.licenseNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchDept && matchSearch;
+    const q = searchQuery.toLowerCase();
+    const matchesDept = selectedDept === 'ALL' || doc.departmentId === selectedDept;
+    const matchesSearch =
+      doc.user.name.toLowerCase().includes(q) ||
+      doc.specialization.toLowerCase().includes(q) ||
+      doc.licenseNumber.toLowerCase().includes(q);
+    return matchesDept && matchesSearch;
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Doctor & Physician Staff Directory
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage hospital medical staff, department assignments, licenses, and consultation fees.
-          </p>
-        </div>
+    <div className="space-y-6 text-white select-none">
+      {/* 3D Hospital Corridor Header */}
+      <HospitalHeader3D
+        type="corridor"
+        badge="Physicians & Medical Staff"
+        title="Physicians & Specialists Directory"
+        subtitle="Manage hospital medical staff, credentials, consultation fees, and clinical department assignments."
+        actions={
+          <button
+            onClick={() => {
+              setShowAddModal(true);
+              setError(null);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/20 transition-all hover:scale-105"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            Register Doctor
+          </button>
+        }
+      />
 
-        <button
-          onClick={() => {
-            setShowAddModal(true);
-            setError(null);
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-purple-500/20 transition-all self-start"
-        >
-          <Plus className="w-4 h-4" />
-          Add New Doctor
-        </button>
-      </div>
-
-      {/* Filters Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card flex flex-col md:flex-row gap-4 justify-between items-center">
+      {/* Filter & Search Bar */}
+      <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl flex flex-col md:flex-row gap-4 justify-between items-center text-white">
         <div className="w-full md:w-80 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search doctor, license #, specialty..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-purple-500 focus:bg-white"
+            placeholder="Search by physician name or license..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-950/50 border border-white/15 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 placeholder:text-slate-500"
           />
         </div>
 
@@ -156,214 +155,167 @@ export const DoctorManagement: React.FC = () => {
             onClick={() => setSelectedDept('ALL')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               selectedDept === 'ALL'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            All Departments
+            All Units ({doctors.length})
           </button>
-          {departments.map((d) => (
+          {departments.map((dept) => (
             <button
-              key={d.id}
-              onClick={() => setSelectedDept(d.id)}
+              key={dept.id}
+              onClick={() => setSelectedDept(dept.id)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                selectedDept === d.id
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                selectedDept === dept.id
+                  ? 'bg-blue-500/30 text-blue-300 border border-blue-400/50 shadow-md backdrop-blur-md'
+                  : 'bg-slate-950/40 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              {d.name}
+              {dept.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Doctors Table */}
+      {/* Doctors Grid */}
       {loading ? (
-        <LoadingSpinner text="Loading doctors roster..." />
+        <LoadingSpinner text="Querying physician registry..." />
       ) : filteredDoctors.length === 0 ? (
         <EmptyState
           title="No doctors found"
-          description="There are no doctors matching your current query."
+          description="Click 'Register Doctor' to onboard a new physician."
         />
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="p-4">Doctor Profile</th>
-                  <th className="p-4">Specialization</th>
-                  <th className="p-4">Department</th>
-                  <th className="p-4">License Number</th>
-                  <th className="p-4">Experience</th>
-                  <th className="p-4">Fee / Room</th>
-                  <th className="p-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {filteredDoctors.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            doc.user.avatar ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              doc.user.name
-                            )}&background=0284c7&color=fff&bold=true`
-                          }
-                          alt={doc.user.name}
-                          className="w-10 h-10 rounded-xl object-cover ring-2 ring-brand-500/20"
-                        />
-                        <div>
-                          <p className="font-bold text-slate-900 text-sm">{doc.user.name}</p>
-                          <p className="text-[11px] text-slate-400">{doc.user.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-bold text-slate-800">{doc.specialization}</p>
-                      <p className="text-[11px] text-slate-500">{doc.qualification}</p>
-                    </td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-lg bg-brand-50 text-brand-700 font-bold border border-brand-100">
-                        {doc.department?.name || 'General'}
-                      </span>
-                    </td>
-                    <td className="p-4 font-mono font-semibold text-slate-600">
-                      {doc.licenseNumber}
-                    </td>
-                    <td className="p-4">
-                      <span className="font-bold text-slate-800">{doc.experienceYears} Years</span>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-extrabold text-emerald-600">${doc.consultationFee}</p>
-                      <p className="text-[11px] text-slate-400">{doc.roomNumber || 'Room 101'}</p>
-                    </td>
-                    <td className="p-4">
-                      <Badge status={doc.user.status} size="sm" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredDoctors.map((doc) => (
+            <div
+              key={doc.id}
+              className="bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/15 p-5 shadow-xl hover:border-blue-400/40 transition-all flex flex-col justify-between text-white"
+            >
+              <div>
+                <div className="flex items-start gap-4">
+                  <img
+                    src={
+                      doc.user.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        doc.user.name
+                      )}&background=0284c7&color=fff&bold=true`
+                    }
+                    alt={doc.user.name}
+                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-blue-500/30 shrink-0"
+                  />
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded-md border border-blue-400/30">
+                      {doc.department?.name || 'General Practice'}
+                    </span>
+                    <h3 className="text-base font-bold text-white mt-1">Dr. {doc.user.name}</h3>
+                    <p className="text-xs text-slate-300">{doc.qualification}</p>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-300 mt-1 font-medium">
+                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <span>{doc.experienceYears} Years Exp.</span>
+                      <span className="text-slate-500">•</span>
+                      <span className="text-blue-300 font-bold">${doc.consultationFee} Fee</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3.5 border-t border-white/10 space-y-2 text-xs text-slate-300">
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span className="truncate">{doc.user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>{doc.user.phone || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <span>Location: {doc.roomNumber || 'Consultation Suite'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3.5 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+                <span className="font-mono text-[11px]">Lic: {doc.licenseNumber}</span>
+                <span className="text-emerald-400 font-bold">● Active Roster</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Add Doctor Modal */}
+      {/* Register Doctor Modal */}
       {showAddModal && (
         <Modal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
-          title="Add New Physician to Medical Staff"
-          subtitle="Register credentials, qualifications, and department assignment"
-          maxWidth="2xl"
+          title="Register Medical Specialist"
+          subtitle="Add a licensed physician to hospital roster"
+          maxWidth="lg"
         >
-          <form onSubmit={handleAddDoctor} className="space-y-4 text-xs">
+          <form onSubmit={handleAddDoctor} className="space-y-4">
             {error && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl">
-                {error}
+              <div className="p-3 bg-rose-950/50 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Doctor Full Name *
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Full Name *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Dr. Arthur Conan, MD"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  placeholder="e.g. Sarah Jenkins"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
                   Email Address *
                 </label>
                 <input
                   type="email"
                   required
-                  placeholder="arthur@hospital.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  placeholder="doctor@hospital.com"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Password *
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Temporary Password *
                 </label>
                 <input
                   type="password"
                   required
-                  minLength={6}
-                  placeholder="Min 6 characters"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  placeholder="••••••••"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  placeholder="+1 (555) 019-2000"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Specialization Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Senior Pediatric Surgeon"
-                  value={formData.specialization}
-                  onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Medical License Number *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. MD-PED-88912"
-                  value={formData.licenseNumber}
-                  onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Department Assignment *
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Clinical Department *
                 </label>
                 <select
+                  required
                   value={formData.departmentId}
                   onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 >
                   {departments.map((d) => (
-                    <option key={d.id} value={d.id}>
+                    <option key={d.id} value={d.id} className="bg-slate-900 text-white">
                       {d.name} ({d.code})
                     </option>
                   ))}
@@ -371,42 +323,57 @@ export const DoctorManagement: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Consultation Fee ($ USD)
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Specialization *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.specialization}
+                  onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                  placeholder="e.g. Interventional Cardiology"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  License Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.licenseNumber}
+                  onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                  placeholder="e.g. MED-LIC-2026-99"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Consultation Fee (USD) *
                 </label>
                 <input
                   type="number"
                   min={0}
-                  step={5}
+                  required
                   value={formData.consultationFee}
                   onChange={(e) => setFormData({ ...formData, consultationFee: Number(e.target.value) })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Room / Suite Number
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                  Consultation Suite Location
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Suite 204"
                   value={formData.roomNumber}
                   onChange={(e) => setFormData({ ...formData, roomNumber: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Experience (Years)
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={formData.experienceYears}
-                  onChange={(e) => setFormData({ ...formData, experienceYears: Number(e.target.value) })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                  placeholder="e.g. Suite 204"
+                  className="w-full p-2.5 bg-slate-950/60 border border-white/20 rounded-xl text-xs sm:text-sm text-white focus:border-blue-400"
                 />
               </div>
             </div>
@@ -415,14 +382,14 @@ export const DoctorManagement: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50"
+                className="px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-md shadow-purple-500/20 disabled:opacity-70"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md"
               >
                 {submitting ? 'Registering...' : 'Register Physician'}
               </button>
@@ -433,3 +400,5 @@ export const DoctorManagement: React.FC = () => {
     </div>
   );
 };
+
+export default DoctorManagement;

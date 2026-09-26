@@ -4,19 +4,22 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  XCircle,
   PlayCircle,
   BedDouble,
   ArrowRight,
   Stethoscope,
+  Users,
+  FileText,
+  Activity,
+  ClipboardList,
+  Pill,
+  ChevronRight,
 } from 'lucide-react';
 
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { StatCard } from '../../components/common/StatCard';
-import { Badge } from '../../components/common/Badge';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
-import { EmptyState } from '../../components/common/EmptyState';
+import { Badge } from '../../components/common/Badge';
 
 export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -25,10 +28,6 @@ export const DoctorDashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ================================
-  // FETCH DOCTOR DASHBOARD
-  // ================================
-
   useEffect(() => {
     fetchDashboard();
   }, []);
@@ -36,9 +35,7 @@ export const DoctorDashboard: React.FC = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-
       const res = await api.get('/stats/dashboard');
-
       if (res.data.success) {
         setData(res.data.data);
       }
@@ -49,39 +46,18 @@ export const DoctorDashboard: React.FC = () => {
     }
   };
 
-  // ================================
-  // UPDATE APPOINTMENT STATUS
-  // ================================
-
-  const handleQuickStatus = async (
-    appointmentId: string,
-    status: string
-  ) => {
+  const handleQuickStatus = async (appointmentId: string, status: string) => {
     try {
-      await api.patch(`/appointments/${appointmentId}/status`, {
-        status,
-      });
-
-      // Reload dashboard after status change
+      await api.patch(`/appointments/${appointmentId}/status`, { status });
       await fetchDashboard();
     } catch (err) {
       console.error('Failed to update appointment status:', err);
     }
   };
 
-  // ================================
-  // LOADING
-  // ================================
-
   if (loading) {
-    return (
-      <LoadingSpinner text="Loading your clinical schedule..." />
-    );
+    return <LoadingSpinner text="Connecting to Clinical Command Wing..." />;
   }
-
-  // ================================
-  // DASHBOARD DATA
-  // ================================
 
   const {
     stats = {},
@@ -90,455 +66,227 @@ export const DoctorDashboard: React.FC = () => {
   } = data || {};
 
   return (
-    <div className="space-y-6">
+    <div className="relative z-10 w-full min-h-[calc(100vh-8rem)] text-white space-y-8 select-none py-2 max-w-6xl">
+      {/* =========================================================================
+          1. CLINICAL HEADER DIRECTLY ON BACKGROUND (NO BIG CARD)
+         ========================================================================= */}
+      <div className="space-y-1 drop-shadow-md">
+        <div className="flex items-center gap-2 text-cyan-300 font-semibold text-xs tracking-wider uppercase">
+          <Stethoscope className="w-3.5 h-3.5 text-cyan-400" />
+          <span>HIRO HOSPITAL • Clinical Wing</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-lg">
+          Welcome, <br className="hidden sm:inline" />
+          <span className="bg-gradient-to-r from-cyan-300 via-sky-200 to-white bg-clip-text text-transparent">
+            Dr. {user?.name || 'Physician'}
+          </span>
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-xl drop-shadow">
+          {user?.doctor?.specialization || 'Clinical Specialist'} • Suite: {user?.doctor?.roomNumber || 'Room 102'} • Duty Status: Active
+        </p>
+      </div>
 
-      {/* ===================================== */}
-      {/* WELCOME BANNER */}
-      {/* ===================================== */}
-
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-brand-800 via-brand-900 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-
-          <div>
-
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/30 text-brand-200 text-xs font-semibold backdrop-blur-md mb-3 border border-brand-400/30">
-
-              <Stethoscope className="w-3.5 h-3.5" />
-
-              Clinical Consultation Portal
-
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-
-              Welcome, {user?.name || 'Doctor'}
-
-            </h1>
-
-            <p className="mt-1 text-xs sm:text-sm text-brand-200">
-
-              {user?.doctor?.specialization ||
-                'Medical Professional'}
-
-              {' • '}
-
-              {user?.doctor?.roomNumber ||
-                'Main Consultation Suite'}
-
-            </p>
-
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-
-            <Link
-              to="/doctor/appointments"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold shadow-md transition-all"
-            >
-
-              <Calendar className="w-4 h-4" />
-
-              Manage All Appointments
-              {' '}
-              ({pendingAppointments.length} Pending)
-
-            </Link>
-
-          </div>
-
+      {/* =========================================================================
+          2. CLINICAL COUNTERS (DIRECT ON BACKGROUND, NO CARDS)
+         ========================================================================= */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-3xl py-2 drop-shadow-md">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+            Today's Patients
+          </span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-white">
+            {stats.todayAppointments || todaySchedule.length || 0}
+          </span>
+          <span className="text-[10px] text-cyan-300 block font-medium">Scheduled Slots</span>
         </div>
 
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+            Pending Requests
+          </span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-white">
+            {stats.pendingRequests || pendingAppointments.length || 0}
+          </span>
+          <span className="text-[10px] text-cyan-300 block font-medium">Awaiting Confirmation</span>
+        </div>
+
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+            Consultations
+          </span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-white">
+            {stats.completedTotal || 0}
+          </span>
+          <span className="text-[10px] text-cyan-300 block font-medium">Completed Total</span>
+        </div>
+
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+            Active Inpatients
+          </span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-white">
+            {stats.activeAdmittedPatients || 0}
+          </span>
+          <span className="text-[10px] text-cyan-300 block font-medium">Under Medical Care</span>
+        </div>
       </div>
 
-      {/* ===================================== */}
-      {/* STATISTICS */}
-      {/* ===================================== */}
+      {/* =========================================================================
+          3. CLINICAL ACTION PILLS DIRECTLY ON BACKGROUND
+         ========================================================================= */}
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        <Link
+          to="/doctor/patients"
+          className="px-4 py-2.5 rounded-full bg-cyan-500/25 hover:bg-cyan-500/40 text-white font-bold text-xs border border-cyan-400/40 backdrop-blur-md transition-all hover:scale-105 flex items-center gap-2 shadow-sm"
+        >
+          <Users className="w-3.5 h-3.5" />
+          View Assigned Patients
+        </Link>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Link
+          to="/doctor/schedule"
+          className="px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all hover:scale-105 flex items-center gap-2"
+        >
+          <Clock className="w-3.5 h-3.5 text-cyan-300" />
+          Open Schedule
+        </Link>
 
-        <StatCard
-          title="Today's Appointments"
-          value={stats.todayAppointments || 0}
-          subtitle="Scheduled consultation slots"
-          icon={Calendar}
-          color="brand"
-        />
+        <Link
+          to="/doctor/appointments"
+          className="px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all hover:scale-105 flex items-center gap-2"
+        >
+          <ClipboardList className="w-3.5 h-3.5 text-cyan-300" />
+          Medical Records
+        </Link>
 
-        <StatCard
-          title="Pending Requests"
-          value={stats.pendingRequests || 0}
-          subtitle="Awaiting doctor confirmation"
-          icon={Clock}
-          color="amber"
-        />
-
-        <StatCard
-          title="Consultations Completed"
-          value={stats.completedTotal || 0}
-          subtitle="Total lifetime consultations"
-          icon={CheckCircle}
-          color="emerald"
-        />
-
-        <StatCard
-          title="Active Inpatients"
-          value={stats.activeAdmittedPatients || 0}
-          subtitle="Under your medical care"
-          icon={BedDouble}
-          color="purple"
-        />
-
+        <Link
+          to="/doctor/appointments"
+          className="px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all hover:scale-105 flex items-center gap-2"
+        >
+          <Pill className="w-3.5 h-3.5 text-cyan-300" />
+          Write Prescription
+        </Link>
       </div>
 
-      {/* ===================================== */}
-      {/* MAIN GRID */}
-      {/* ===================================== */}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* ================================= */}
-        {/* TODAY'S SCHEDULE */}
-        {/* ================================= */}
-
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card">
-
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-
-            <div>
-
-              <h3 className="text-sm font-bold text-slate-900">
-                Today's Consultation Schedule
-              </h3>
-
-              <p className="text-xs text-slate-500">
-                Live patient appointments for today
-              </p>
-
-            </div>
-
-            <Link
-              to="/doctor/appointments"
-              className="text-xs font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1"
-            >
-
-              View Full Queue
-
-              <ArrowRight className="w-3.5 h-3.5" />
-
-            </Link>
-
+      {/* =========================================================================
+          4. TODAY'S SCHEDULE (TIMED APPOINTMENTS LIST DIRECTLY ON SCENE)
+         ========================================================================= */}
+      <div className="space-y-4 pt-4 max-w-4xl">
+        <div className="flex items-center justify-between border-b border-white/15 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <h2 className="text-sm font-extrabold uppercase tracking-widest text-cyan-300">
+              Today's Schedule & Queue
+            </h2>
           </div>
+          <Link
+            to="/doctor/appointments"
+            className="text-xs text-slate-300 hover:text-white flex items-center gap-1 font-medium"
+          >
+            All Appointments <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
 
-          <div className="mt-4 space-y-3">
-
-            {todaySchedule.length === 0 ? (
-
-              <EmptyState
-                title="No appointments scheduled for today"
-                description="Your upcoming patient appointments will appear here."
-              />
-
-            ) : (
-
-              todaySchedule.map((apt: any) => {
-
-                // ==================================
-                // SAFE PATIENT DATA
-                // Prevents:
-                // Cannot read properties of undefined
-                // ==================================
-
-                const patientName =
-                  apt?.patient?.user?.name ||
-                  apt?.patient?.name ||
-                  'Unknown Patient';
-
-                const patientAvatar =
-                  apt?.patient?.user?.avatar ||
-                  apt?.patient?.avatar ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    patientName
-                  )}&background=0f766e&color=fff`;
-
-                const appointmentId =
-                  apt?.id || apt?._id;
-
-                return (
-
-                  <div
-                    key={
-                      appointmentId ||
-                      `${patientName}-${apt?.timeSlot}`
-                    }
-                    className="p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-
-                    <div className="flex items-center gap-3">
-
-                      <img
-                        src={patientAvatar}
-                        alt={patientName}
-                        className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200"
-                        onError={(event) => {
-                          event.currentTarget.src =
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              patientName
-                            )}&background=0f766e&color=fff`;
-                        }}
-                      />
-
-                      <div>
-
-                        <h4 className="text-xs font-bold text-slate-900">
-
-                          {patientName}
-
-                        </h4>
-
-                        <p className="text-[11px] text-slate-500">
-
-                          {apt?.reason ||
-                            'No reason provided'}
-
-                        </p>
-
-                        <span className="text-[10px] font-mono text-brand-700 font-semibold flex items-center gap-1 mt-0.5">
-
-                          <Clock className="w-3 h-3" />
-
-                          {apt?.timeSlot ||
-                            'Time not available'}
-
-                        </span>
-
-                      </div>
-
+        <div className="space-y-2.5">
+          {todaySchedule.length === 0 ? (
+            <p className="text-xs text-slate-400 py-3">No consultations scheduled for today.</p>
+          ) : (
+            todaySchedule.map((apt: any, idx: number) => {
+              const patientName = apt?.patient?.user?.name || apt?.patient?.name || 'Patient';
+              return (
+                <div
+                  key={apt.id || apt._id || idx}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between py-3 border-b border-white/10 gap-3 text-xs"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 font-mono font-bold text-xs border border-cyan-400/30">
+                      {apt.timeSlot || '09:00 AM'}
+                    </span>
+                    <div>
+                      <span className="font-bold text-white text-sm block">{patientName}</span>
+                      <span className="text-[11px] text-slate-300">
+                        {apt.reason || 'General Consultation'} • #{apt.appointmentNumber || 'APT'}
+                      </span>
                     </div>
-
-                    <div className="flex items-center gap-2 self-end sm:self-center">
-
-                      <Badge
-                        status={apt?.status || 'PENDING'}
-                        size="sm"
-                      />
-
-                      {apt?.status === 'ACCEPTED' &&
-                        appointmentId && (
-
-                          <button
-                            onClick={() =>
-                              navigate(
-                                `/doctor/consultation?aptId=${appointmentId}`
-                              )
-                            }
-                            className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-colors"
-                          >
-
-                            <PlayCircle className="w-3.5 h-3.5" />
-
-                            Start Consult
-
-                          </button>
-
-                        )}
-
-                      {apt?.status === 'IN_PROGRESS' &&
-                        appointmentId && (
-
-                          <button
-                            onClick={() =>
-                              navigate(
-                                `/doctor/consultation?aptId=${appointmentId}`
-                              )
-                            }
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-colors animate-pulse"
-                          >
-
-                            <Stethoscope className="w-3.5 h-3.5" />
-
-                            Resume & Prescribe
-
-                          </button>
-
-                        )}
-
-                    </div>
-
                   </div>
 
-                );
-              })
-
-            )}
-
-          </div>
-
-        </div>
-
-        {/* ================================= */}
-        {/* PENDING APPOINTMENTS */}
-        {/* ================================= */}
-
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card">
-
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-
-            <div>
-
-              <h3 className="text-sm font-bold text-slate-900">
-                Pending Appointment Requests
-              </h3>
-
-              <p className="text-xs text-slate-500">
-                Approve or reject booking inquiries
-              </p>
-
-            </div>
-
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-
-              {pendingAppointments.length} pending
-
-            </span>
-
-          </div>
-
-          <div className="mt-4 space-y-3">
-
-            {pendingAppointments.length === 0 ? (
-
-              <EmptyState
-                title="No pending requests"
-                description="You are all caught up! New patient appointment bookings will appear here."
-              />
-
-            ) : (
-
-              pendingAppointments.map((apt: any) => {
-
-                // ==================================
-                // SAFE PATIENT DATA
-                // ==================================
-
-                const patientName =
-                  apt?.patient?.user?.name ||
-                  apt?.patient?.name ||
-                  'Unknown Patient';
-
-                const appointmentId =
-                  apt?.id || apt?._id;
-
-                return (
-
-                  <div
-                    key={
-                      appointmentId ||
-                      `${patientName}-${apt?.appointmentDate}-${apt?.timeSlot}`
-                    }
-                    className="p-4 rounded-xl border border-amber-100 bg-amber-50/40 hover:bg-amber-50/70 transition-colors"
-                  >
-
-                    <div className="flex items-start justify-between gap-2">
-
-                      <div>
-
-                        <h4 className="text-xs font-bold text-slate-900">
-
-                          {patientName}
-
-                        </h4>
-
-                        <p className="text-xs text-slate-600 mt-0.5">
-
-                          Reason:{' '}
-
-                          {apt?.reason ||
-                            'No reason provided'}
-
-                        </p>
-
-                        <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-500 font-medium">
-
-                          <span className="flex items-center gap-1">
-
-                            <Calendar className="w-3 h-3 text-slate-400" />
-
-                            {apt?.appointmentDate ||
-                              'Date not available'}
-
-                          </span>
-
-                          <span className="flex items-center gap-1">
-
-                            <Clock className="w-3 h-3 text-slate-400" />
-
-                            {apt?.timeSlot ||
-                              'Time not available'}
-
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                    <div className="mt-3 pt-2.5 border-t border-amber-200/60 flex items-center justify-end gap-2">
-
+                  <div className="flex items-center gap-3">
+                    <Badge status={apt.status || 'SCHEDULED'} size="sm" />
+                    {apt.status === 'CONFIRMED' || apt.status === 'PENDING' ? (
                       <button
-                        disabled={!appointmentId}
-                        onClick={() => {
-                          if (appointmentId) {
-                            handleQuickStatus(
-                              appointmentId,
-                              'REJECTED'
-                            );
-                          }
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 text-xs font-bold flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => navigate(`/doctor/consultation/${apt.id || apt._id}`)}
+                        className="px-3.5 py-1.5 rounded-full bg-cyan-500/30 hover:bg-cyan-500/50 border border-cyan-400/40 text-cyan-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5"
                       >
-
-                        <XCircle className="w-3.5 h-3.5" />
-
-                        Decline
-
+                        <PlayCircle className="w-3.5 h-3.5" />
+                        Start Consultation
                       </button>
-
-                      <button
-                        disabled={!appointmentId}
-                        onClick={() => {
-                          if (appointmentId) {
-                            handleQuickStatus(
-                              appointmentId,
-                              'ACCEPTED'
-                            );
-                          }
-                        }}
-                        className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-
-                        <CheckCircle className="w-3.5 h-3.5" />
-
-                        Accept Booking
-
-                      </button>
-
-                    </div>
-
+                    ) : (
+                      <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" /> Completed
+                      </span>
+                    )}
                   </div>
-
-                );
-              })
-
-            )}
-
-          </div>
-
+                </div>
+              );
+            })
+          )}
         </div>
-
       </div>
 
+      {/* =========================================================================
+          5. PENDING REQUESTS REQUIRING CONFIRMATION
+         ========================================================================= */}
+      {pendingAppointments.length > 0 && (
+        <div className="space-y-3 pt-2 max-w-4xl">
+          <div className="flex items-center justify-between border-b border-amber-400/30 pb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+              Pending Patient Requests ({pendingAppointments.length})
+            </h3>
+            <Link
+              to="/doctor/appointments"
+              className="text-xs text-amber-300/80 hover:text-amber-200"
+            >
+              Review All
+            </Link>
+          </div>
+
+          <div className="space-y-2">
+            {pendingAppointments.slice(0, 3).map((apt: any, idx: number) => {
+              const pName = apt?.patient?.user?.name || apt?.patient?.name || 'Patient';
+              return (
+                <div
+                  key={apt.id || apt._id || idx}
+                  className="flex items-center justify-between py-2 border-b border-white/5 text-xs text-slate-200"
+                >
+                  <div>
+                    <span className="font-bold text-white block">{pName}</span>
+                    <span className="text-[11px] text-slate-400">
+                      {apt.appointmentDate} at {apt.timeSlot} • {apt.reason || 'Consultation request'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleQuickStatus(apt.id || apt._id, 'CONFIRMED')}
+                      className="px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-400/30 text-xs font-bold transition-colors"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleQuickStatus(apt.id || apt._id, 'CANCELLED')}
+                      className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 text-xs transition-colors"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+export default DoctorDashboard;
