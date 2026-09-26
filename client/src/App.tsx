@@ -35,13 +35,18 @@ import { AllAppointments } from './pages/admin/AllAppointments';
 import { UserManagement } from './pages/admin/UserManagement';
 
 const RootRedirect: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
 
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (loading) {
+    return null;
+  }
+  if (!user || !token) {
+    return <Navigate to="/login" replace />;
+  }
   if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
   if (user.role === 'DOCTOR') return <Navigate to="/doctor" replace />;
-  return <Navigate to="/patient" replace />;
+  if (user.role === 'PATIENT') return <Navigate to="/patient" replace />;
+  return <Navigate to="/login" replace />;
 };
 
 export const App: React.FC = () => {
@@ -54,6 +59,20 @@ export const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/" element={<RootRedirect />} />
+
+            {/* Direct Aliases for Standard Hospital Routes -> Guarded via RootRedirect */}
+            <Route path="/dashboard" element={<RootRedirect />} />
+            <Route path="/patients" element={<RootRedirect />} />
+            <Route path="/doctors" element={<RootRedirect />} />
+            <Route path="/appointments" element={<RootRedirect />} />
+            <Route path="/medical-records" element={<RootRedirect />} />
+            <Route path="/prescriptions" element={<RootRedirect />} />
+            <Route path="/laboratory" element={<RootRedirect />} />
+            <Route path="/pharmacy" element={<RootRedirect />} />
+            <Route path="/rooms" element={<RootRedirect />} />
+            <Route path="/billing" element={<RootRedirect />} />
+            <Route path="/reports" element={<RootRedirect />} />
+            <Route path="/settings" element={<RootRedirect />} />
 
             {/* Patient Portal Protected Routes */}
             <Route element={<ProtectedRoute allowedRoles={['PATIENT']} />}>
@@ -92,7 +111,7 @@ export const App: React.FC = () => {
               </Route>
             </Route>
 
-            {/* Fallback */}
+            {/* Fallback for unknown routes */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
@@ -102,3 +121,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

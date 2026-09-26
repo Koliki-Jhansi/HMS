@@ -9,17 +9,17 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <LoadingSpinner text="Authenticating user session..." size="lg" />
+        <LoadingSpinner text="Authenticating secure session..." size="lg" />
       </div>
     );
   }
 
-  if (!user) {
+  if (!user || !token) {
     return <Navigate to="/login" replace />;
   }
 
@@ -30,8 +30,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
       DOCTOR: '/doctor',
       PATIENT: '/patient',
     };
-    return <Navigate to={redirectMap[user.role] || '/'} replace />;
+    return <Navigate to={redirectMap[user.role] || '/login'} replace />;
   }
 
   return <Outlet />;
 };
+

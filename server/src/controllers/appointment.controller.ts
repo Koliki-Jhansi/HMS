@@ -1,8 +1,65 @@
 import { Response } from 'express';
 import mongoose from 'mongoose';
-import { Appointment, Doctor, Patient, Department, Prescription, Notification } from '../models';
+import { Appointment, Doctor, Patient, Department, Prescription, Notification, Counter } from '../models';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { catchAsync, AppError } from '../middleware/error.middleware';
+
+const syncCounterWithExistingAppointments = async (counterName: string, currentYear: number): Promise<void> => {
+  const existingCounter = await Counter.findOne({ name: counterName });
+  if (!existingCounter) {
+    const appointments = await Appointment.find({
+      appointmentNumber: { $regex: `^APT-${currentYear}-` },
+    }).select('appointmentNumber').lean();
+
+    let maxSeq = 0;
+    for (const apt of appointments) {
+      const match = apt.appointmentNumber.match(/^APT-\d{4}-(\d+)/);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxSeq) {
+          maxSeq = num;
+        }
+      }
+    }
+
+    await Counter.findOneAndUpdate(
+      { name: counterName },
+      { $setOnInsert: { seq: maxSeq } },
+      { upsert: true }
+    );
+  }
+};
+
+const generateUniqueAppointmentNumber = async (): Promise<string> => {
+  const currentYear = new Date().getFullYear();
+  const counterName = `appointmentNumber_${currentYear}`;
+
+  await syncCounterWithExistingAppointments(counterName, currentYear);
+
+  const counter = await Counter.findOneAndUpdate(
+    { name: counterName },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true, setDefaultsOnInsert: true }
+  );
+
+  let seqNum = counter.seq;
+  let appointmentNumber = `APT-${currentYear}-${String(seqNum).padStart(6, '0')}`;
+
+  // Safeguard: verify no collision with existing records
+  while (await Appointment.exists({ appointmentNumber })) {
+    const updated = await Counter.findOneAndUpdate(
+      { name: counterName },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    seqNum = updated.seq;
+    appointmentNumber = `APT-${currentYear}-${String(seqNum).padStart(6, '0')}`;
+  }
+
+  return appointmentNumber;
+};
+
+
 
 export const getAppointments = catchAsync(async (req: AuthRequest, res: Response) => {
   const { status, doctorId, patientId, departmentId, date, search } = req.query;
@@ -182,22 +239,43 @@ export const createAppointment = catchAsync(async (req: AuthRequest, res: Respon
     throw new AppError('This time slot is already booked for this doctor. Please choose another time slot.', 400);
   }
 
-  const appointmentCount = await Appointment.countDocuments();
-  const appointmentNumber = `APT-2026-${(600 + appointmentCount).toString()}`;
+  let apt: any = null;
+  let attempts = 0;
+  const maxAttempts = 5;
 
-  const apt = await Appointment.create({
-    appointmentNumber,
-    patientId: new mongoose.Types.ObjectId(patientId),
-    doctorId: new mongoose.Types.ObjectId(doctorId),
-    departmentId: departmentId && mongoose.Types.ObjectId.isValid(departmentId)
-      ? new mongoose.Types.ObjectId(departmentId)
-      : doctor.departmentId,
-    appointmentDate,
-    timeSlot,
-    status: 'PENDING',
-    reason,
-    symptoms,
-  });
+  while (attempts < maxAttempts) {
+    try {
+      const appointmentNumber = await generateUniqueAppointmentNumber();
+      apt = await Appointment.create({
+        appointmentNumber,
+        patientId: new mongoose.Types.ObjectId(patientId),
+        doctorId: new mongoose.Types.ObjectId(doctorId),
+        departmentId: departmentId && mongoose.Types.ObjectId.isValid(departmentId)
+          ? new mongoose.Types.ObjectId(departmentId)
+          : doctor.departmentId,
+        appointmentDate,
+        timeSlot,
+        status: 'PENDING',
+        reason,
+        symptoms,
+      });
+      break;
+    } catch (err: any) {
+      if (err.code === 11000 && (err.keyPattern?.appointmentNumber || String(err.message).includes('appointmentNumber'))) {
+        attempts++;
+        if (attempts >= maxAttempts) {
+          throw new AppError('Unable to generate unique appointment number. Please try again.', 500);
+        }
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  if (!apt) {
+    throw new AppError('Failed to create appointment record', 500);
+  }
+
 
   // Notify doctor
   const docUser = (doctor.userId as any);

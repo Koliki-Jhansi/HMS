@@ -13,33 +13,41 @@ interface AuthContextType {
   register: (data: any) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
-  loginAsDemo: (role: Role) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    setLoading(false);
+  };
+
   const refreshUser = async () => {
+    const storedToken = localStorage.getItem('token');
+    if (!storedToken) {
+      setUser(null);
+      setToken(null);
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
       const res = await api.get('/auth/me');
-      if (res.data.success && res.data.user) {
+      if (res.data?.success && res.data?.user) {
         setUser(res.data.user);
         localStorage.setItem('user', JSON.stringify(res.data.user));
+      } else {
+        logout();
       }
     } catch (err) {
-      console.error('Failed to fetch current user session:', err);
       logout();
     } finally {
       setLoading(false);
@@ -52,46 +60,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
-    if (res.data.success) {
+    if (res.data?.success) {
       const { token: newToken, user: newUser } = res.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setToken(newToken);
       setUser(newUser);
+      setLoading(false);
+    } else {
+      throw new Error(res.data?.message || 'Authentication failed');
     }
-  };
-
-  const loginAsDemo = async (role: Role) => {
-    let email = 'admin@hospital.com';
-    let password = 'admin123';
-
-    if (role === 'DOCTOR') {
-      email = 'dr.sarah@hospital.com';
-      password = 'doctor123';
-    } else if (role === 'PATIENT') {
-      email = 'patient.john@hospital.com';
-      password = 'patient123';
-    }
-
-    await login(email, password);
   };
 
   const register = async (data: any) => {
     const res = await api.post('/auth/register', data);
-    if (res.data.success) {
+    if (res.data?.success) {
       const { token: newToken, user: newUser } = res.data;
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setToken(newToken);
       setUser(newUser);
+      setLoading(false);
+    } else {
+      throw new Error(res.data?.message || 'Registration failed');
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setToken(null);
-    setUser(null);
   };
 
   const isAdmin = user?.role === 'ADMIN';
@@ -111,7 +103,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         refreshUser,
-        loginAsDemo,
       }}
     >
       {children}
@@ -126,3 +117,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

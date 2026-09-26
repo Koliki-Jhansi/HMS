@@ -5,9 +5,6 @@ import {
   Activity,
   LogOut,
   User as UserIcon,
-  ShieldCheck,
-  Stethoscope,
-  Heart,
   ChevronDown,
   CheckCheck,
 } from 'lucide-react';
@@ -16,7 +13,7 @@ import { useNotifications } from '../../context/NotificationContext';
 import { Badge } from '../common/Badge';
 
 export const Navbar: React.FC = () => {
-  const { user, logout, loginAsDemo } = useAuth();
+  const { user, logout } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
 
@@ -41,16 +38,9 @@ export const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
-  const handleDemoSwitch = async (role: 'ADMIN' | 'DOCTOR' | 'PATIENT') => {
-    await loginAsDemo(role);
-    setShowUserMenu(false);
-    if (role === 'ADMIN') navigate('/admin');
-    else if (role === 'DOCTOR') navigate('/doctor');
-    else navigate('/patient');
-  };
 
   return (
     <header className="sticky top-0 z-40 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 lg:px-8 flex items-center justify-between shadow-xs">
@@ -73,46 +63,13 @@ export const Navbar: React.FC = () => {
         {/* Live status badge */}
         <div className="hidden sm:flex items-center gap-2 ml-4 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[11px] font-semibold text-emerald-700">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-status-pulse" />
-          <span>Live OPD & Ward Systems Active</span>
+          <span>Live Hospital Systems Active</span>
         </div>
       </div>
 
       {/* Right controls */}
       <div className="flex items-center gap-3">
-        {/* Quick Demo Role Switcher Chips */}
-        <div className="hidden md:flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
-          <span className="text-slate-500 px-2">Role:</span>
-          <button
-            onClick={() => handleDemoSwitch('ADMIN')}
-            className={`px-2.5 py-1 rounded-lg transition-all ${
-              user?.role === 'ADMIN'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-white'
-            }`}
-          >
-            Admin
-          </button>
-          <button
-            onClick={() => handleDemoSwitch('DOCTOR')}
-            className={`px-2.5 py-1 rounded-lg transition-all ${
-              user?.role === 'DOCTOR'
-                ? 'bg-brand-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-white'
-            }`}
-          >
-            Doctor
-          </button>
-          <button
-            onClick={() => handleDemoSwitch('PATIENT')}
-            className={`px-2.5 py-1 rounded-lg transition-all ${
-              user?.role === 'PATIENT'
-                ? 'bg-teal-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-white'
-            }`}
-          >
-            Patient
-          </button>
-        </div>
+
 
         {/* Notification Bell */}
         {user && (

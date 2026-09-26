@@ -10,3 +10,5 @@ export { Appointment, IAppointment } from './Appointment.model';
 export { Prescription, IPrescription } from './Prescription.model';
 export { MedicalRecord, IMedicalRecord } from './MedicalRecord.model';
 export { Notification, INotification } from './Notification.model';
+export { Counter, ICounter } from './Counter.model';
+
